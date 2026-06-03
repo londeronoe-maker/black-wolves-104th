@@ -392,6 +392,184 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 }
 .equip-desc { font-size: 11px; color: var(--text-dim); line-height: 1.65; }
 
+/* ========== TERMINAL (CMD) ========== */
+#page-terminal { padding: 0 !important; background: #000; }
+
+.term-window {
+  background: #000;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Consolas', 'Share Tech Mono', monospace;
+}
+
+.term-titlebar {
+  background: #1a1a1a;
+  border-bottom: 1px solid #333;
+  padding: 7px 14px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; color: #ccc; letter-spacing: 1px;
+  flex-shrink: 0;
+}
+.term-titlebar .dots { display: flex; gap: 6px; }
+.term-titlebar .dots span { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+.term-dot-r { background: #ff5f56; }
+.term-dot-y { background: #ffbd2e; }
+.term-dot-g { background: #27c93f; }
+.term-title-txt { flex: 1; text-align: center; color: #888; }
+
+.term-body {
+  flex: 1;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #cfcfcf;
+  overflow-y: auto;
+  cursor: text;
+}
+
+.term-body .line { white-space: pre-wrap; word-break: break-word; }
+.term-out-red    { color: #ff5f56; }
+.term-out-green  { color: #27c93f; }
+.term-out-yellow { color: #ffbd2e; }
+.term-out-cyan   { color: #56b6e0; }
+.term-out-dim    { color: #777; }
+.term-out-white  { color: #fff; }
+
+.term-input-line { display: flex; align-items: baseline; }
+.term-prompt { color: #27c93f; white-space: nowrap; margin-right: 8px; }
+.term-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #cfcfcf;
+  font-family: inherit;
+  font-size: 14px;
+  flex: 1;
+  caret-color: #27c93f;
+}
+
+/* ========== DASHBOARD ========== */
+#dashboard {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 500;
+  display: none;
+  flex-direction: column;
+  animation: fadeUp 0.3s ease;
+}
+#dashboard.active { display: flex; }
+
+.dash-topbar {
+  background: var(--sidebar-bg);
+  border-bottom: 2px solid var(--red);
+  padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.dash-brand {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px; font-weight: 900; letter-spacing: 3px; color: #fff;
+}
+.dash-brand span { color: var(--red); }
+.dash-user { font-size: 10px; letter-spacing: 2px; color: var(--text-dim); display: flex; align-items: center; gap: 14px; }
+.dash-logout {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px; letter-spacing: 2px; font-weight: 700;
+  padding: 7px 16px; border: 1px solid var(--red); background: transparent;
+  color: var(--red); cursor: pointer; text-transform: uppercase; transition: all 0.18s;
+}
+.dash-logout:hover { background: var(--red); color: #fff; }
+
+.dash-tabs {
+  display: flex; gap: 2px; background: var(--bg2);
+  border-bottom: 1px solid var(--border); flex-shrink: 0; padding: 0 16px;
+}
+.dash-tab {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px; letter-spacing: 2px; font-weight: 700;
+  padding: 14px 22px; color: var(--text-muted); cursor: pointer;
+  border-bottom: 2px solid transparent; text-transform: uppercase; transition: all 0.18s;
+}
+.dash-tab:hover { color: var(--text-dim); }
+.dash-tab.active { color: #fff; border-bottom-color: var(--red); }
+
+.dash-content { flex: 1; overflow-y: auto; padding: 28px; }
+.dash-panel { display: none; max-width: 1000px; margin: 0 auto; }
+.dash-panel.active { display: block; }
+
+.dash-section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: 3px;
+  color: var(--text); margin-bottom: 18px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 10px;
+}
+.dash-section-title::after { content:''; flex:1; height:1px; background: var(--border); }
+
+/* dash list rows */
+.dash-row {
+  background: var(--panel); border: 1px solid var(--border);
+  border-left: 3px solid var(--red);
+  padding: 14px 16px; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+.dash-row-info { flex: 1; min-width: 0; }
+.dash-row-title {
+  font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700;
+  letter-spacing: 1px; color: var(--text); margin-bottom: 4px;
+}
+.dash-row-sub { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+.dash-row-meta { font-size: 9px; letter-spacing: 2px; color: var(--red); margin-bottom: 4px; text-transform: uppercase; }
+.dash-del {
+  font-family: 'Orbitron', sans-serif; font-size: 9px; letter-spacing: 1px; font-weight: 700;
+  padding: 7px 12px; border: 1px solid var(--red-border); background: var(--red-dim);
+  color: var(--red); cursor: pointer; text-transform: uppercase; transition: all 0.18s; flex-shrink: 0;
+}
+.dash-del:hover { background: var(--red); color: #fff; }
+
+/* dash form */
+.dash-form {
+  background: var(--panel); border: 1px solid var(--border);
+  border-top: 3px solid var(--red); padding: 20px; margin-top: 20px;
+}
+.dash-form-title {
+  font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; color: var(--text); margin-bottom: 16px; text-transform: uppercase;
+}
+.dash-field { margin-bottom: 12px; }
+.dash-field label {
+  display: block; font-size: 9px; letter-spacing: 2px; color: var(--text-muted);
+  margin-bottom: 5px; text-transform: uppercase;
+}
+.dash-field input, .dash-field textarea, .dash-field select {
+  width: 100%; background: var(--bg); border: 1px solid var(--border-mid);
+  color: var(--text); font-family: 'Share Tech Mono', monospace; font-size: 12px;
+  padding: 9px 12px; outline: none; transition: border-color 0.18s;
+}
+.dash-field input:focus, .dash-field textarea:focus, .dash-field select:focus { border-color: var(--red); }
+.dash-field textarea { resize: vertical; min-height: 60px; }
+.dash-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.dash-add-btn {
+  font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 2px; font-weight: 700;
+  padding: 12px 28px; border: 1px solid var(--red); background: var(--red);
+  color: #fff; cursor: pointer; text-transform: uppercase; transition: all 0.18s; margin-top: 6px;
+}
+.dash-add-btn:hover { background: var(--red-bright); }
+
+.dash-stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.dash-stat {
+  background: var(--panel); border: 1px solid var(--border); border-top: 3px solid var(--red);
+  padding: 20px; text-align: center;
+}
+.dash-stat .v { font-family: 'Orbitron', sans-serif; font-size: 28px; font-weight: 900; color: var(--text); }
+.dash-stat .l { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); margin-top: 6px; text-transform: uppercase; }
+
+@media (max-width: 600px) {
+  .dash-form-grid { grid-template-columns: 1fr; }
+  .dash-tab { padding: 12px 12px; font-size: 9px; }
+}
+
 /* ========== INFO BOX ========== */
 .info-box {
   border: 1px solid var(--amber-border);
@@ -576,6 +754,7 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
     <a onclick="showPage('effectifs')"    id="nav-effectifs">   <span class="nav-icon">◇</span>  Effectifs</a>
     <a onclick="showPage('equipement')"   id="nav-equipement">  <span class="nav-icon">▣</span>  Équipement</a>
     <a onclick="showPage('recrutement')"  id="nav-recrutement"> <span class="nav-icon">▸</span>  Recrutement</a>
+    <a onclick="showPage('terminal')"     id="nav-terminal">    <span class="nav-icon">▌</span>  Terminal</a>
   </nav>
   <div class="sidebar-bottom">
     <div class="sidebar-clock" id="clock">--:--:--</div>
@@ -730,49 +909,9 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
       </div>
       <div class="ph-badge green"><div class="dot"></div> À JOUR</div>
     </div>
-    <div class="grid-3">
-      <div class="member-card">
-        <div class="member-rank">▲ Fondateur</div>
-        <div class="member-name">WILDFIRE</div>
-        <div class="member-id">Commandant — Black Wolves</div>
-        <div class="member-role">Leadership & Commandement opérationnel de la compagnie</div>
-        <span class="badge badge-red">FONDATEUR</span>
-      </div>
-      <div class="member-card">
-        <div class="member-rank">▲ Fondateur</div>
-        <div class="member-name">FENRIR</div>
-        <div class="member-id">Spécialiste Démolition</div>
-        <div class="member-role">Explosifs, Charges, Neutralisation de fortifications</div>
-        <span class="badge badge-red">FONDATEUR</span>
-      </div>
-      <div class="member-card">
-        <div class="member-rank">▲ Fondateur</div>
-        <div class="member-name">SPITTER</div>
-        <div class="member-id">Pilote de Combat</div>
-        <div class="member-role">AT-TE, TX-225, Manœuvres blindées en terrain hostile</div>
-        <span class="badge badge-red">FONDATEUR</span>
-      </div>
-      <div class="member-card">
-        <div class="member-rank">▲ Fondateur</div>
-        <div class="member-name">BOLT</div>
-        <div class="member-id">Stratège Tactique</div>
-        <div class="member-role">Planification d'opérations, Analyse de terrain</div>
-        <span class="badge badge-red">FONDATEUR</span>
-      </div>
-      <div class="member-card">
-        <div class="member-rank">▲ Fondateur</div>
-        <div class="member-name">MOUSE</div>
-        <div class="member-id">Technicien / Pirate Informatique</div>
-        <div class="member-role">Systèmes CIS, Réparations de terrain, Ingénierie</div>
-        <span class="badge badge-red">FONDATEUR</span>
-      </div>
-      <div class="member-card" style="border-style:dashed; border-top-style:dashed; opacity:0.35; align-items:center; justify-content:center; min-height:160px; text-align:center; gap:6px;">
-        <div style="font-size:10px; letter-spacing:3px; color:var(--text-muted);">SLOT DISPONIBLE</div>
-        <div style="font-size:11px; color:var(--text-muted);">Rejoignez la meute</div>
-      </div>
-    </div>
+    <div class="grid-3" id="effectifs-grid"></div>
     <div style="margin-top:20px; font-size:10px; letter-spacing:2px; color:var(--text-muted); text-align:center; padding:14px; border:1px solid var(--border); background:var(--panel);">
-      EFFECTIF ACTUEL : <span style="color:var(--red);">5 MEMBRES ACTIFS</span>
+      EFFECTIF ACTUEL : <span style="color:var(--red);" id="effectifs-count">0 MEMBRES ACTIFS</span>
     </div>
     <div class="page-footer"><span>BLACK WOLVES // 104ème WOLFPACK</span><span class="pf-red">DÉCLASSIFIÉ — BW-03</span></div>
   </div>
@@ -789,169 +928,25 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 
     <div class="info-box" style="margin-bottom:24px;">
       <span class="ib-icon">↺</span>
-      <span>Modèles 3D interactifs — <strong style="color:var(--text);">Cliquez sur un modèle</strong> pour le charger, puis faites-le tourner à la souris. Via Sketchfab.</span>
+      <span>Modèles 3D interactifs — <strong style="color:var(--text);">Cliquez sur un modèle</strong> pour le charger, puis faites-le tourner à la souris. Inventaire géré via le Terminal.</span>
     </div>
 
     <!-- SECTION 1 : ÉQUIPEMENT INDIVIDUEL -->
     <div class="equip-section">
-      <div class="equip-section-title">
-        <span class="cat-icon">🪖</span> Équipement Individuel
-      </div>
-      <div class="equip-grid">
-
-        <div class="equip-item">
-          <div class="equip-3d">
-            <iframe id="sf-dc15a" data-src="https://sketchfab.com/models/133cbdfdf0ae41078a7c5f1f93b7a7a4/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
-            <div class="model-overlay" onclick="loadModel('sf-dc15a')">
-              <div class="model-preview-icon">🔫</div>
-              <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
-              <div class="model-preview-hint">▶ Cliquer pour charger</div>
-            </div>
-            <span class="model-badge">SKETCHFAB</span>
-          </div>
-          <div class="equip-info">
-            <div class="equip-code">DC-15A</div>
-            <div class="equip-name">DC-15A Blaster Rifle</div>
-            <div class="equip-desc">Fusil blaster standard des soldats clones. Précision longue portée, fiable dans tous les environnements de combat.</div>
-          </div>
-        </div>
-
-        <div class="equip-item">
-          <div class="equip-3d">
-            <iframe id="sf-z6" data-src="https://sketchfab.com/models/003791d3a53d4d2facb46f9325ca83da/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
-            <div class="model-overlay" onclick="loadModel('sf-z6')">
-              <div class="model-preview-icon">⚙️</div>
-              <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
-              <div class="model-preview-hint">▶ Cliquer pour charger</div>
-            </div>
-            <span class="model-badge">SKETCHFAB</span>
-          </div>
-          <div class="equip-info">
-            <div class="equip-code">Z-6</div>
-            <div class="equip-name">Z-6 Rotary Blaster Cannon</div>
-            <div class="equip-desc">Mitrailleuse rotative 6 canons. Cadence de tir dévastatrice. Supprime les vagues d'infanterie droïde.</div>
-          </div>
-        </div>
-
-        <div class="equip-item">
-          <div class="equip-3d" style="display:flex; align-items:center; justify-content:center;">
-            <div style="text-align:center; padding:20px;">
-              <div style="font-size:32px; margin-bottom:10px;">💣</div>
-              <div style="font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:2px; color:var(--red); margin-bottom:6px;">DONNÉES TACTIQUES</div>
-              <div style="font-size:10px; color:var(--text-muted); letter-spacing:1px;">Modèle non disponible<br>sur plateforme publique</div>
-            </div>
-          </div>
-          <div class="equip-info">
-            <div class="equip-code">EXP</div>
-            <div class="equip-name">Charges Explosives & Détonateurs</div>
-            <div class="equip-desc">Spécialité signature des Black Wolves depuis Felucia. Neutralisation de fortifications, sabotage de ravitaillement ennemi.</div>
-          </div>
-        </div>
-
-        <div class="equip-item">
-          <div class="equip-3d" style="display:flex; align-items:center; justify-content:center;">
-            <div style="text-align:center; padding:20px;">
-              <div style="font-size:32px; margin-bottom:10px;">💻</div>
-              <div style="font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:2px; color:var(--red); margin-bottom:6px;">DONNÉES TACTIQUES</div>
-              <div style="font-size:10px; color:var(--text-muted); letter-spacing:1px;">Modèle non disponible<br>sur plateforme publique</div>
-            </div>
-          </div>
-          <div class="equip-info">
-            <div class="equip-code">SYS</div>
-            <div class="equip-name">Kit Piratage Systèmes CIS</div>
-            <div class="equip-desc">Outil technique spécialisé. Détourne, perturbe ou désactive les réseaux de commandement droïdes ennemis.</div>
-          </div>
-        </div>
-
-      </div>
+      <div class="equip-section-title"><span class="cat-icon">🪖</span> Équipement Individuel</div>
+      <div class="equip-grid" id="equip-individuel"></div>
     </div>
 
     <!-- SECTION 2 : VÉHICULES & MARCHEURS -->
     <div class="equip-section">
-      <div class="equip-section-title">
-        <span class="cat-icon">🦾</span> Véhicules & Marcheurs
-      </div>
-      <div class="equip-grid">
-
-        <div class="equip-item">
-          <div class="equip-3d">
-            <iframe id="sf-atte" data-src="https://sketchfab.com/models/81ef81cf6c554055b741b43a1a08d69f/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
-            <div class="model-overlay" onclick="loadModel('sf-atte')">
-              <div class="model-preview-icon">🦿</div>
-              <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
-              <div class="model-preview-hint">▶ Cliquer pour charger</div>
-            </div>
-            <span class="model-badge">SKETCHFAB</span>
-          </div>
-          <div class="equip-info">
-            <div class="equip-code">AT-TE</div>
-            <div class="equip-name">All Terrain Tactical Enforcer</div>
-            <div class="equip-desc">Marcheur blindé lourd à 6 pattes. Canon laser ventral + 6 canons laser de flanc. Colonne vertébrale de la compagnie.</div>
-          </div>
-        </div>
-
-        <div class="equip-item">
-          <div class="equip-3d">
-            <iframe id="sf-tx225" data-src="https://sketchfab.com/models/f1ef52168cc2483e9369899ff532b21f/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
-            <div class="model-overlay" onclick="loadModel('sf-tx225')">
-              <div class="model-preview-icon">🚜</div>
-              <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
-              <div class="model-preview-hint">▶ Cliquer pour charger</div>
-            </div>
-            <span class="model-badge">SKETCHFAB</span>
-          </div>
-          <div class="equip-info">
-            <div class="equip-code">TX-225</div>
-            <div class="equip-name">Occupier Combat Assault Tank</div>
-            <div class="equip-desc">Véhicule de combat rapide à chenilles. Idéal pour les assauts urbains et la percée de lignes défensives.</div>
-          </div>
-        </div>
-
-        <div class="equip-item">
-          <div class="equip-3d">
-            <iframe id="sf-atrt" data-src="https://sketchfab.com/models/22ef70d90e834539ac4e6c790acba8dd/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
-            <div class="model-overlay" onclick="loadModel('sf-atrt')">
-              <div class="model-preview-icon">🤖</div>
-              <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
-              <div class="model-preview-hint">▶ Cliquer pour charger</div>
-            </div>
-            <span class="model-badge">SKETCHFAB</span>
-          </div>
-          <div class="equip-info">
-            <div class="equip-code">AT-RT</div>
-            <div class="equip-name">All Terrain Recon Transport</div>
-            <div class="equip-desc">Marcheur léger bipède monoplace. Mobilité maximale pour la reconnaissance et le harcèlement d'infanterie.</div>
-          </div>
-        </div>
-
-      </div>
+      <div class="equip-section-title"><span class="cat-icon">🦾</span> Véhicules & Marcheurs</div>
+      <div class="equip-grid" id="equip-vehicule"></div>
     </div>
 
     <!-- SECTION 3 : CANONS & ARTILLERIE LOURDE -->
     <div class="equip-section">
-      <div class="equip-section-title">
-        <span class="cat-icon">💥</span> Canons & Artillerie Lourde
-      </div>
-      <div class="equip-grid">
-
-        <div class="equip-item">
-          <div class="equip-3d">
-            <iframe id="sf-av7" data-src="https://sketchfab.com/models/e4f819a9c71d4f3fbc76d6b4a2a9bbac/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
-            <div class="model-overlay" onclick="loadModel('sf-av7')">
-              <div class="model-preview-icon">🎯</div>
-              <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
-              <div class="model-preview-hint">▶ Cliquer pour charger</div>
-            </div>
-            <span class="model-badge">SKETCHFAB</span>
-          </div>
-          <div class="equip-info">
-            <div class="equip-code">AV-7</div>
-            <div class="equip-name">AV-7 Antivehicle Cannon</div>
-            <div class="equip-desc">Canon d'artillerie lourde antiblindé. Longue portée. Soutien indirect pour troupes au sol. Détruit tout véhicule ennemi.</div>
-          </div>
-        </div>
-
-      </div>
+      <div class="equip-section-title"><span class="cat-icon">💥</span> Canons & Artillerie Lourde</div>
+      <div class="equip-grid" id="equip-canon"></div>
     </div>
 
     <div class="page-footer"><span>BLACK WOLVES // 104ème WOLFPACK</span><span class="pf-red">DÉCLASSIFIÉ — BW-04</span></div>
@@ -1015,7 +1010,132 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
     <div class="page-footer"><span>BLACK WOLVES // 104ème WOLFPACK</span><span class="pf-red">DÉCLASSIFIÉ — BW-05</span></div>
   </div>
 
+  <!-- TERMINAL -->
+  <div class="page" id="page-terminal">
+    <div class="term-window">
+      <div class="term-titlebar">
+        <div class="dots"><span class="term-dot-r"></span><span class="term-dot-y"></span><span class="term-dot-g"></span></div>
+        <div class="term-title-txt">C:\BLACKWOLVES\SYSTEM — cmd.exe</div>
+        <div style="width:50px;"></div>
+      </div>
+      <div class="term-body" id="term-body" onclick="focusTerm()">
+        <div class="line term-out-green">Black Wolves OS [Version 2.4.104]</div>
+        <div class="line term-out-dim">(c) 104ème Bataillon Wolfpack — Flotte Cosmos. Tous droits réservés.</div>
+        <div class="line">&nbsp;</div>
+        <div class="line">Tapez <span class="term-out-yellow">help</span> pour la liste des commandes.</div>
+        <div class="line">&nbsp;</div>
+        <div id="term-history"></div>
+        <div class="term-input-line">
+          <span class="term-prompt" id="term-prompt-label">C:\BLACKWOLVES&gt;</span>
+          <input type="text" class="term-input" id="term-input" autocomplete="off" spellcheck="false" autofocus>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div><!-- /#main -->
+
+<!-- ====== DASHBOARD ====== -->
+<div id="dashboard">
+  <div class="dash-topbar">
+    <div class="dash-brand">BLACK <span>WOLVES</span> — PANNEAU DE COMMANDEMENT</div>
+    <div class="dash-user">
+      <span id="dash-user-label">CONNECTÉ</span>
+      <button class="dash-logout" onclick="dashLogout()">DÉCONNEXION</button>
+    </div>
+  </div>
+  <div class="dash-tabs">
+    <div class="dash-tab active" onclick="dashTab('effectifs')" id="dtab-effectifs">Effectifs</div>
+    <div class="dash-tab" onclick="dashTab('equipements')" id="dtab-equipements">Équipements</div>
+    <div class="dash-tab" onclick="dashTab('comptes')" id="dtab-comptes" style="display:none;">Comptes</div>
+    <div class="dash-tab" onclick="dashTab('systeme')" id="dtab-systeme">Système</div>
+  </div>
+  <div class="dash-content">
+
+    <!-- EFFECTIFS PANEL -->
+    <div class="dash-panel active" id="dpanel-effectifs">
+      <div class="dash-section-title">Gestion des Effectifs</div>
+      <div id="dash-effectifs-list"></div>
+      <div class="dash-form">
+        <div class="dash-form-title">+ Ajouter un membre</div>
+        <div class="dash-form-grid">
+          <div class="dash-field"><label>Nom de code</label><input id="f-mem-name" placeholder="ex: SHADOW"></div>
+          <div class="dash-field"><label>Grade / Rang</label><input id="f-mem-rank" placeholder="ex: ▲ Soldat"></div>
+        </div>
+        <div class="dash-field"><label>Spécialité / Poste</label><input id="f-mem-id" placeholder="ex: Pilote de Combat"></div>
+        <div class="dash-field"><label>Rôle / Description</label><textarea id="f-mem-role" placeholder="Description du rôle dans la compagnie"></textarea></div>
+        <div class="dash-field"><label>Badge</label><input id="f-mem-badge" placeholder="ex: ACTIF, FONDATEUR..." value="ACTIF"></div>
+        <button class="dash-add-btn" onclick="addMember()">▸ Ajouter à la meute</button>
+      </div>
+    </div>
+
+    <!-- EQUIPEMENTS PANEL -->
+    <div class="dash-panel" id="dpanel-equipements">
+      <div class="dash-section-title">Gestion de l'Inventaire</div>
+      <div id="dash-equip-list"></div>
+      <div class="dash-form">
+        <div class="dash-form-title">+ Ajouter un équipement</div>
+        <div class="dash-form-grid">
+          <div class="dash-field"><label>Code</label><input id="f-eq-code" placeholder="ex: DC-17"></div>
+          <div class="dash-field"><label>Catégorie</label>
+            <select id="f-eq-cat">
+              <option value="individuel">Équipement Individuel</option>
+              <option value="vehicule">Véhicule / Marcheur</option>
+              <option value="canon">Canon / Artillerie</option>
+            </select>
+          </div>
+        </div>
+        <div class="dash-field"><label>Nom complet</label><input id="f-eq-name" placeholder="ex: DC-17 Hand Blaster"></div>
+        <div class="dash-field"><label>Description</label><textarea id="f-eq-desc" placeholder="Description de l'équipement"></textarea></div>
+        <div class="dash-form-grid">
+          <div class="dash-field"><label>Icône (emoji, optionnel)</label><input id="f-eq-icon" placeholder="ex: 🔫" value="📦"></div>
+          <div class="dash-field"><label>ID modèle Sketchfab (optionnel)</label><input id="f-eq-sf" placeholder="ex: 133cbdf..."></div>
+        </div>
+        <button class="dash-add-btn" onclick="addEquip()">▸ Ajouter à l'inventaire</button>
+      </div>
+    </div>
+
+    <!-- COMPTES PANEL (admin) -->
+    <div class="dash-panel" id="dpanel-comptes">
+      <div class="dash-section-title">Gestion des Comptes</div>
+      <div class="info-box">
+        <span class="ib-icon">ℹ</span>
+        <span>Comptes stockés <strong style="color:var(--text);">hors du code</strong> (dans le navigateur). Accès roleplay uniquement — n'utilisez pas de vrais mots de passe sensibles.</span>
+      </div>
+      <div id="dash-comptes-list"></div>
+      <div class="dash-form">
+        <div class="dash-form-title">+ Créer un compte</div>
+        <div class="dash-form-grid">
+          <div class="dash-field"><label>Identifiant</label><input id="f-acc-id" placeholder="ex: spitter" autocomplete="off"></div>
+          <div class="dash-field"><label>Mot de passe</label><input id="f-acc-pw" placeholder="mot de passe" autocomplete="off"></div>
+        </div>
+        <div class="dash-field"><label>Rôle</label>
+          <select id="f-acc-role">
+            <option value="membre">Membre (gestion effectifs / équipements)</option>
+            <option value="admin">Admin (accès total + comptes)</option>
+          </select>
+        </div>
+        <button class="dash-add-btn" onclick="addAccount()">▸ Créer le compte</button>
+      </div>
+    </div>
+
+    <!-- SYSTEME PANEL -->
+    <div class="dash-panel" id="dpanel-systeme">
+      <div class="dash-section-title">État du Système</div>
+      <div class="dash-stat-grid">
+        <div class="dash-stat"><div class="v" id="stat-members">0</div><div class="l">Membres actifs</div></div>
+        <div class="dash-stat"><div class="v" id="stat-equip">0</div><div class="l">Équipements</div></div>
+        <div class="dash-stat"><div class="v">v2.4</div><div class="l">Version OS</div></div>
+      </div>
+      <div class="info-box" style="border-color:var(--red-border); background:var(--red-dim);">
+        <span class="ib-icon" style="color:var(--red);">!</span>
+        <span>La <strong style="color:var(--text);">réinitialisation</strong> efface tous les ajouts et restaure les données d'origine de la compagnie. Action irréversible.</span>
+      </div>
+      <button class="dash-add-btn" style="background:transparent; border-color:var(--red); color:var(--red);" onclick="resetData()">↺ Réinitialiser les données</button>
+    </div>
+
+  </div>
+</div>
 
 <script>
 // BOOT
@@ -1090,6 +1210,419 @@ function showPage(id) {
   const nav = document.getElementById('nav-'+id);
   if(nav) nav.classList.add('active');
 }
+
+// LOAD 3D MODEL (Sketchfab lazy load)
+function loadModel(iframeId) {
+  const iframe = document.getElementById(iframeId);
+  if (!iframe) return;
+  iframe.src = iframe.getAttribute('data-src');
+  const overlay = iframe.parentElement.querySelector('.model-overlay');
+  if (overlay) overlay.classList.add('hidden');
+}
+
+/* ============================================================
+   DONNÉES — Effectifs & Équipements (persistance localStorage)
+   ============================================================ */
+
+// >>> IDENTIFIANTS DE CONNEXION (modifiez ici) <<<
+// Format de commande dans le terminal : connexion_IDENTIFIANT_MOTDEPASSE
+const CREDENTIALS = {
+  'wildfire': 'blackwolves',   // commandant
+  'admin':    'cosmos104'      // accès admin
+};
+
+const DEFAULT_DATA = {
+  effectifs: [
+    { rank:'▲ Fondateur', name:'WILDFIRE', id:'Commandant — Black Wolves', role:'Leadership & Commandement opérationnel de la compagnie', badge:'FONDATEUR' },
+    { rank:'▲ Fondateur', name:'FENRIR', id:'Spécialiste Démolition', role:'Explosifs, Charges, Neutralisation de fortifications', badge:'FONDATEUR' },
+    { rank:'▲ Fondateur', name:'SPITTER', id:'Pilote de Combat', role:'AT-TE, TX-225, Manœuvres blindées en terrain hostile', badge:'FONDATEUR' },
+    { rank:'▲ Fondateur', name:'BOLT', id:'Stratège Tactique', role:"Planification d'opérations, Analyse de terrain", badge:'FONDATEUR' },
+    { rank:'▲ Fondateur', name:'MOUSE', id:'Technicien / Pirate Informatique', role:'Systèmes CIS, Réparations de terrain, Ingénierie', badge:'FONDATEUR' }
+  ],
+  equipements: [
+    { cat:'individuel', code:'DC-15A', name:'DC-15A Blaster Rifle', desc:'Fusil blaster standard des soldats clones. Précision longue portée, fiable dans tous les environnements de combat.', icon:'🔫', sf:'133cbdfdf0ae41078a7c5f1f93b7a7a4' },
+    { cat:'individuel', code:'Z-6', name:'Z-6 Rotary Blaster Cannon', desc:"Mitrailleuse rotative 6 canons. Cadence de tir dévastatrice. Supprime les vagues d'infanterie droïde.", icon:'⚙️', sf:'003791d3a53d4d2facb46f9325ca83da' },
+    { cat:'individuel', code:'EXP', name:'Charges Explosives & Détonateurs', desc:'Spécialité signature des Black Wolves depuis Felucia. Neutralisation de fortifications, sabotage de ravitaillement ennemi.', icon:'💣', sf:'' },
+    { cat:'individuel', code:'SYS', name:'Kit Piratage Systèmes CIS', desc:'Outil technique spécialisé. Détourne, perturbe ou désactive les réseaux de commandement droïdes ennemis.', icon:'💻', sf:'' },
+    { cat:'vehicule', code:'AT-TE', name:'All Terrain Tactical Enforcer', desc:'Marcheur blindé lourd à 6 pattes. Canon laser ventral + 6 canons laser de flanc. Colonne vertébrale de la compagnie.', icon:'🦿', sf:'81ef81cf6c554055b741b43a1a08d69f' },
+    { cat:'vehicule', code:'TX-225', name:'Occupier Combat Assault Tank', desc:'Véhicule de combat rapide à chenilles. Idéal pour les assauts urbains et la percée de lignes défensives.', icon:'🚜', sf:'f1ef52168cc2483e9369899ff532b21f' },
+    { cat:'vehicule', code:'AT-RT', name:'All Terrain Recon Transport', desc:"Marcheur léger bipède monoplace. Mobilité maximale pour la reconnaissance et le harcèlement d'infanterie.", icon:'🤖', sf:'22ef70d90e834539ac4e6c790acba8dd' },
+    { cat:'canon', code:'AV-7', name:'AV-7 Antivehicle Cannon', desc:"Canon d'artillerie lourde antiblindé. Longue portée. Soutien indirect pour troupes au sol. Détruit tout véhicule ennemi.", icon:'🎯', sf:'' }
+  ],
+  comptes: []   // comptes créés hors-code (stockés dans le navigateur)
+};
+
+const STORE_KEY = 'blackwolves_data_v1';
+let memFallback = null; // si localStorage indisponible
+
+function loadData() {
+  let d;
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    d = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DEFAULT_DATA));
+  } catch(e) {
+    d = memFallback || JSON.parse(JSON.stringify(DEFAULT_DATA));
+  }
+  // compatibilité : garantir les champs
+  if (!Array.isArray(d.effectifs)) d.effectifs = JSON.parse(JSON.stringify(DEFAULT_DATA.effectifs));
+  if (!Array.isArray(d.equipements)) d.equipements = JSON.parse(JSON.stringify(DEFAULT_DATA.equipements));
+  if (!Array.isArray(d.comptes)) d.comptes = [];
+  return d;
+}
+function saveData(d) {
+  memFallback = d;
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(d)); } catch(e) {}
+}
+let DATA = loadData();
+
+// échappement HTML
+function esc(s) {
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ===== RENDU PAGE EFFECTIFS ===== */
+function renderEffectifs() {
+  const grid = document.getElementById('effectifs-grid');
+  if (!grid) return;
+  let html = '';
+  DATA.effectifs.forEach(m => {
+    html += `<div class="member-card">
+      <div class="member-rank">${esc(m.rank)}</div>
+      <div class="member-name">${esc(m.name)}</div>
+      <div class="member-id">${esc(m.id)}</div>
+      <div class="member-role">${esc(m.role)}</div>
+      <span class="badge badge-red">${esc(m.badge)}</span>
+    </div>`;
+  });
+  html += `<div class="member-card" style="border-style:dashed; border-top-style:dashed; opacity:0.35; align-items:center; justify-content:center; min-height:160px; text-align:center; gap:6px;">
+    <div style="font-size:10px; letter-spacing:3px; color:var(--text-muted);">SLOT DISPONIBLE</div>
+    <div style="font-size:11px; color:var(--text-muted);">Rejoignez la meute</div>
+  </div>`;
+  grid.innerHTML = html;
+  const cnt = document.getElementById('effectifs-count');
+  if (cnt) cnt.textContent = DATA.effectifs.length + ' MEMBRE' + (DATA.effectifs.length>1?'S':'') + ' ACTIF' + (DATA.effectifs.length>1?'S':'');
+}
+
+/* ===== RENDU PAGE ÉQUIPEMENT ===== */
+function equipCardHTML(e, idx) {
+  let viewer;
+  if (e.sf) {
+    const fid = 'sf-eq-' + idx;
+    viewer = `<div class="equip-3d">
+      <iframe id="${fid}" data-src="https://sketchfab.com/models/${esc(e.sf)}/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
+      <div class="model-overlay" onclick="loadModel('${fid}')">
+        <div class="model-preview-icon">${esc(e.icon||'📦')}</div>
+        <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
+        <div class="model-preview-hint">▶ Cliquer pour charger</div>
+      </div>
+      <span class="model-badge">SKETCHFAB</span>
+    </div>`;
+  } else {
+    viewer = `<div class="equip-3d" style="display:flex; align-items:center; justify-content:center;">
+      <div style="text-align:center; padding:20px;">
+        <div style="font-size:32px; margin-bottom:10px;">${esc(e.icon||'📦')}</div>
+        <div style="font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:2px; color:var(--red); margin-bottom:6px;">DONNÉES TACTIQUES</div>
+        <div style="font-size:10px; color:var(--text-muted); letter-spacing:1px;">Aperçu image / capture<br>à intégrer</div>
+      </div>
+    </div>`;
+  }
+  return `<div class="equip-item">${viewer}
+    <div class="equip-info">
+      <div class="equip-code">${esc(e.code)}</div>
+      <div class="equip-name">${esc(e.name)}</div>
+      <div class="equip-desc">${esc(e.desc)}</div>
+    </div>
+  </div>`;
+}
+function renderEquipements() {
+  const cats = { individuel:'equip-individuel', vehicule:'equip-vehicule', canon:'equip-canon' };
+  Object.keys(cats).forEach(c => { const el = document.getElementById(cats[c]); if(el) el.innerHTML=''; });
+  DATA.equipements.forEach((e, idx) => {
+    const target = document.getElementById(cats[e.cat] || 'equip-individuel');
+    if (target) target.insertAdjacentHTML('beforeend', equipCardHTML(e, idx));
+  });
+}
+
+function renderAll() { renderEffectifs(); renderEquipements(); }
+
+/* ============================================================
+   TERMINAL
+   ============================================================ */
+let currentUser = null;
+let currentRole = null;
+let cmdHistory = [];
+let histIdx = -1;
+
+// vérifie les comptes (localStorage) puis les admins de secours (CREDENTIALS)
+function authenticate(id, pw) {
+  const acc = DATA.comptes.find(c => c.id.toLowerCase() === id);
+  if (acc && acc.pw === pw) return { ok:true, role: acc.role || 'membre' };
+  if (CREDENTIALS[id] && CREDENTIALS[id] === pw) return { ok:true, role:'admin' };
+  return { ok:false };
+}
+
+function focusTerm() { const i = document.getElementById('term-input'); if(i) i.focus(); }
+
+function termPrint(text, cls) {
+  const hist = document.getElementById('term-history');
+  const div = document.createElement('div');
+  div.className = 'line' + (cls ? ' ' + cls : '');
+  div.innerHTML = text;
+  hist.appendChild(div);
+  const body = document.getElementById('term-body');
+  body.scrollTop = body.scrollHeight;
+}
+
+function termRunCommand(raw) {
+  const cmd = raw.trim();
+  // affiche la ligne saisie
+  const label = currentUser ? ('C:\\BLACKWOLVES\\' + currentUser.toUpperCase() + '>') : 'C:\\BLACKWOLVES>';
+  termPrint(esc(label) + ' ' + esc(cmd), 'term-out-white');
+  if (!cmd) return;
+
+  cmdHistory.push(cmd); histIdx = cmdHistory.length;
+  const lower = cmd.toLowerCase();
+
+  // commande de connexion : connexion_id_mdp
+  if (lower.startsWith('connexion_') || lower.startsWith('connexion ')) {
+    const sep = cmd.includes('_') ? '_' : ' ';
+    const parts = cmd.split(sep);
+    // connexion _ id _ mdp  -> parts = [connexion, id, mdp...]
+    const id = (parts[1] || '').toLowerCase();
+    const pw = parts.slice(2).join(sep);
+    const auth = authenticate(id, pw);
+    if (auth.ok) {
+      currentUser = id;
+      currentRole = auth.role;
+      termPrint('Authentification réussie. Bienvenue, <span class="term-out-white">' + esc(id.toUpperCase()) + '</span> [' + esc(auth.role) + '].', 'term-out-green');
+      termPrint('Ouverture du panneau de commandement...', 'term-out-dim');
+      document.getElementById('term-prompt-label').textContent = 'C:\\BLACKWOLVES\\' + currentUser.toUpperCase() + '>';
+      setTimeout(openDashboard, 600);
+    } else {
+      termPrint("ACCÈS REFUSÉ — identifiant ou mot de passe incorrect.", 'term-out-red');
+    }
+    return;
+  }
+
+  switch (lower) {
+    case 'help':
+    case 'aide':
+      termPrint('Commandes disponibles :', 'term-out-yellow');
+      termPrint('  <span class="term-out-cyan">help</span>            — affiche cette aide');
+      termPrint('  <span class="term-out-cyan">connexion_ID_MDP</span> — se connecter au panneau de commandement');
+      termPrint('  <span class="term-out-cyan">whoami</span>          — utilisateur actuel');
+      termPrint('  <span class="term-out-cyan">status</span>          — état du système');
+      termPrint('  <span class="term-out-cyan">dir</span> / ls        — liste les modules');
+      termPrint('  <span class="term-out-cyan">date</span>            — date et heure');
+      termPrint('  <span class="term-out-cyan">ver</span>             — version du système');
+      termPrint('  <span class="term-out-cyan">dashboard</span>       — ouvrir le panneau (si connecté)');
+      termPrint('  <span class="term-out-cyan">deconnexion</span>     — se déconnecter');
+      termPrint('  <span class="term-out-cyan">clear</span> / cls     — efface l\'écran');
+      termPrint('&nbsp;');
+      termPrint('Création de comptes : connectez-vous en admin, onglet "Comptes" du panneau.', 'term-out-dim');
+      break;
+    case 'whoami':
+      termPrint(currentUser ? currentUser.toUpperCase() + ' — accès commandement' : 'invité — non authentifié', 'term-out-cyan');
+      break;
+    case 'status':
+      termPrint('● Réseau tactique : <span class="term-out-green">ACTIF</span>');
+      termPrint('● Flotte Cosmos : <span class="term-out-green">CONNECTÉE</span>');
+      termPrint('● Effectifs actifs : <span class="term-out-white">' + DATA.effectifs.length + '</span>');
+      termPrint('● Équipements répertoriés : <span class="term-out-white">' + DATA.equipements.length + '</span>');
+      termPrint('● Accès : ' + (currentUser ? '<span class="term-out-green">COMMANDEMENT</span>' : '<span class="term-out-yellow">INVITÉ</span>'));
+      break;
+    case 'dir':
+    case 'ls':
+      termPrint(' Répertoire de C:\\BLACKWOLVES', 'term-out-dim');
+      termPrint(' &lt;DIR&gt;  presentation.dat');
+      termPrint(' &lt;DIR&gt;  archives_lore.enc');
+      termPrint(' &lt;DIR&gt;  effectifs.db');
+      termPrint(' &lt;DIR&gt;  inventaire.db');
+      termPrint(' &lt;DIR&gt;  recrutement.cfg');
+      termPrint(' &lt;LOCK&gt; commandement.sys  <span class="term-out-red">[accès restreint]</span>');
+      break;
+    case 'date':
+    case 'time':
+      termPrint(new Date().toLocaleString('fr-FR'), 'term-out-cyan');
+      break;
+    case 'ver':
+      termPrint('Black Wolves OS [Version 2.4.104] — 104ème Bataillon Wolfpack', 'term-out-green');
+      break;
+    case 'dashboard':
+      if (currentUser) openDashboard();
+      else termPrint('Connexion requise. Utilisez : connexion_ID_MDP', 'term-out-red');
+      break;
+    case 'deconnexion':
+    case 'logout':
+      if (currentUser) { termPrint('Déconnexion de ' + currentUser.toUpperCase() + '.', 'term-out-yellow'); currentUser = null; document.getElementById('term-prompt-label').textContent = 'C:\\BLACKWOLVES>'; }
+      else termPrint('Aucune session active.', 'term-out-dim');
+      break;
+    case 'clear':
+    case 'cls':
+      document.getElementById('term-history').innerHTML = '';
+      break;
+    case 'wolf':
+    case 'awoo':
+      termPrint('🐺 AWOOOO ! La meute veille.', 'term-out-yellow');
+      break;
+    default:
+      termPrint("'" + esc(cmd) + "' n'est pas reconnu en tant que commande interne. Tapez 'help'.", 'term-out-red');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('term-input');
+  if (input) {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        termRunCommand(input.value);
+        input.value = '';
+      } else if (e.key === 'ArrowUp') {
+        if (cmdHistory.length) { histIdx = Math.max(0, histIdx-1); input.value = cmdHistory[histIdx] || ''; e.preventDefault(); }
+      } else if (e.key === 'ArrowDown') {
+        if (cmdHistory.length) { histIdx = Math.min(cmdHistory.length, histIdx+1); input.value = cmdHistory[histIdx] || ''; e.preventDefault(); }
+      }
+    });
+  }
+});
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+function openDashboard() {
+  const d = document.getElementById('dashboard');
+  document.getElementById('dash-user-label').textContent = 'CONNECTÉ : ' + (currentUser ? currentUser.toUpperCase() : '') + (currentRole ? ' · ' + currentRole.toUpperCase() : '');
+  // onglet Comptes réservé aux admins
+  document.getElementById('dtab-comptes').style.display = (currentRole === 'admin') ? '' : 'none';
+  dashTab('effectifs');
+  renderDashLists();
+  d.classList.add('active');
+}
+function dashLogout() {
+  document.getElementById('dashboard').classList.remove('active');
+  termPrint('Session ' + (currentUser?currentUser.toUpperCase():'') + ' fermée. Retour au terminal.', 'term-out-yellow');
+  currentUser = null;
+  currentRole = null;
+  document.getElementById('term-prompt-label').textContent = 'C:\\BLACKWOLVES>';
+  focusTerm();
+}
+function dashTab(name) {
+  document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('dpanel-'+name).classList.add('active');
+  document.getElementById('dtab-'+name).classList.add('active');
+}
+
+function renderDashLists() {
+  // Effectifs
+  const el = document.getElementById('dash-effectifs-list');
+  el.innerHTML = DATA.effectifs.map((m,i) => `<div class="dash-row">
+    <div class="dash-row-info">
+      <div class="dash-row-meta">${esc(m.rank)} · ${esc(m.badge)}</div>
+      <div class="dash-row-title">${esc(m.name)}</div>
+      <div class="dash-row-sub">${esc(m.id)} — ${esc(m.role)}</div>
+    </div>
+    <button class="dash-del" onclick="delMember(${i})">✕ Retirer</button>
+  </div>`).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucun membre.</div>';
+
+  // Équipements
+  const catLabel = {individuel:'INDIVIDUEL', vehicule:'VÉHICULE', canon:'CANON'};
+  const eq = document.getElementById('dash-equip-list');
+  eq.innerHTML = DATA.equipements.map((e,i) => `<div class="dash-row">
+    <div class="dash-row-info">
+      <div class="dash-row-meta">${esc(catLabel[e.cat]||e.cat)} · ${esc(e.code)}${e.sf?' · 3D':''}</div>
+      <div class="dash-row-title">${esc(e.icon||'')} ${esc(e.name)}</div>
+      <div class="dash-row-sub">${esc(e.desc)}</div>
+    </div>
+    <button class="dash-del" onclick="delEquip(${i})">✕ Retirer</button>
+  </div>`).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucun équipement.</div>';
+
+  // Comptes
+  const ac = document.getElementById('dash-comptes-list');
+  if (ac) {
+    ac.innerHTML = DATA.comptes.map((c,i) => `<div class="dash-row">
+      <div class="dash-row-info">
+        <div class="dash-row-meta">${esc((c.role||'membre').toUpperCase())}</div>
+        <div class="dash-row-title">${esc(c.id)}</div>
+        <div class="dash-row-sub">Mot de passe : ${'•'.repeat(Math.max(4,(c.pw||'').length))}</div>
+      </div>
+      <button class="dash-del" onclick="delAccount(${i})">✕ Supprimer</button>
+    </div>`).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucun compte créé. Les admins de secours restent définis dans le code.</div>';
+  }
+
+  // Stats
+  document.getElementById('stat-members').textContent = DATA.effectifs.length;
+  document.getElementById('stat-equip').textContent = DATA.equipements.length;
+}
+
+function addAccount() {
+  const id = document.getElementById('f-acc-id').value.trim().toLowerCase();
+  const pw = document.getElementById('f-acc-pw').value;
+  const role = document.getElementById('f-acc-role').value;
+  if (!id || !pw) { alert("Identifiant et mot de passe requis."); return; }
+  if (id.includes('_') || id.includes(' ')) { alert("L'identifiant ne doit pas contenir d'espace ni de tiret bas (_)."); return; }
+  if (DATA.comptes.some(c => c.id.toLowerCase() === id) || CREDENTIALS[id]) { alert("Cet identifiant existe déjà."); return; }
+  DATA.comptes.push({ id, pw, role });
+  saveData(DATA);
+  document.getElementById('f-acc-id').value = '';
+  document.getElementById('f-acc-pw').value = '';
+  renderDashLists();
+}
+function delAccount(i) {
+  if (!confirm('Supprimer le compte ' + DATA.comptes[i].id + ' ?')) return;
+  DATA.comptes.splice(i,1); saveData(DATA); renderDashLists();
+}
+
+function addMember() {
+  const name = document.getElementById('f-mem-name').value.trim();
+  if (!name) { alert('Le nom de code est requis.'); return; }
+  DATA.effectifs.push({
+    rank: document.getElementById('f-mem-rank').value.trim() || '▲ Soldat',
+    name: name.toUpperCase(),
+    id: document.getElementById('f-mem-id').value.trim() || 'Membre',
+    role: document.getElementById('f-mem-role').value.trim() || '—',
+    badge: document.getElementById('f-mem-badge').value.trim() || 'ACTIF'
+  });
+  saveData(DATA);
+  ['f-mem-name','f-mem-rank','f-mem-id','f-mem-role'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f-mem-badge').value = 'ACTIF';
+  renderDashLists(); renderAll();
+}
+function delMember(i) {
+  if (!confirm('Retirer ' + DATA.effectifs[i].name + ' de la meute ?')) return;
+  DATA.effectifs.splice(i,1); saveData(DATA); renderDashLists(); renderAll();
+}
+
+function addEquip() {
+  const code = document.getElementById('f-eq-code').value.trim();
+  const name = document.getElementById('f-eq-name').value.trim();
+  if (!code || !name) { alert('Le code et le nom sont requis.'); return; }
+  DATA.equipements.push({
+    cat: document.getElementById('f-eq-cat').value,
+    code: code.toUpperCase(),
+    name: name,
+    desc: document.getElementById('f-eq-desc').value.trim() || '—',
+    icon: document.getElementById('f-eq-icon').value.trim() || '📦',
+    sf: document.getElementById('f-eq-sf').value.trim()
+  });
+  saveData(DATA);
+  ['f-eq-code','f-eq-name','f-eq-desc','f-eq-sf'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f-eq-icon').value = '📦';
+  renderDashLists(); renderAll();
+}
+function delEquip(i) {
+  if (!confirm('Retirer ' + DATA.equipements[i].name + ' de l\'inventaire ?')) return;
+  DATA.equipements.splice(i,1); saveData(DATA); renderDashLists(); renderAll();
+}
+
+function resetData() {
+  if (!confirm('Réinitialiser TOUTES les données aux valeurs d\'origine ? Action irréversible.')) return;
+  DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  saveData(DATA); renderDashLists(); renderAll();
+}
+
+// Rendu initial
+renderAll();
 
 // CLOCK
 function updateClock() {
