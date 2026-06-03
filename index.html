@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLACK WOLVES — 104ème Bataillon Wolfpack</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sidebar-bg:   #0d0d0d;
+  --red:          #c0392b;
+  --red-bright:   #e74c3c;
+  --red-dim:      rgba(192,57,43,0.12);
+  --red-border:   rgba(192,57,43,0.3);
+  --amber:        #d4820a;
+  --amber-dim:    rgba(212,130,10,0.1);
+  --amber-border: rgba(212,130,10,0.3);
+  --green-ok:     #27ae60;
+  --bg:           #181818;
+  --bg2:          #212121;
+  --bg3:          #272727;
+  --panel:        #1e1e1e;
+  --panel2:       #252525;
+  --border:       rgba(255,255,255,0.07);
+  --border-mid:   rgba(255,255,255,0.14);
+  --border-dark:  rgba(255,255,255,0.25);
+  --text:         #e8e8e4;
+  --text-dim:     #a0a09a;
+  --text-muted:   #606058;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+  overflow-x: hidden;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ========== BOOT SCREEN ========== */
+#boot {
+  position: fixed; inset: 0;
+  background: #080808;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+#boot-inner {
+  max-width: 680px;
+  width: 100%;
+  font-family: 'VT323', monospace;
+  font-size: 17px;
+  color: #cc2222;
+}
+
+.boot-logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(22px, 5vw, 48px);
+  font-weight: 900;
+  letter-spacing: 6px;
+  color: var(--red);
+  text-align: center;
+  margin-bottom: 28px;
+  text-shadow: 0 0 30px rgba(192,57,43,0.4);
+}
+
+.boot-line {
+  margin-bottom: 3px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s, transform 0.15s;
+}
+.boot-line.show { opacity: 1; transform: none; }
+.boot-line .ok   { color: #27ae60; }
+.boot-line .warn { color: #d4820a; }
+.boot-line .hi   { color: #e74c3c; }
+.boot-line .dim  { color: #444; }
+
+.boot-bar-wrap { margin-top: 22px; opacity: 0; transition: opacity 0.3s; }
+.boot-bar-wrap.show { opacity: 1; }
+.boot-bar-label { font-size: 13px; color: #555; margin-bottom: 6px; letter-spacing: 2px; }
+.boot-bar-track {
+  width: 100%; height: 18px;
+  border: 1px solid rgba(192,57,43,0.3);
+  background: #0f0f0f;
+  position: relative; overflow: hidden;
+}
+.boot-bar-fill {
+  height: 100%;
+  background: var(--red);
+  width: 0;
+}
+.boot-bar-pct {
+  position: absolute; right: 8px; top: 1px;
+  font-size: 13px; color: var(--red);
+}
+
+/* ========== SIDEBAR ========== */
+#sidebar {
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: 224px;
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  border-right: 1px solid rgba(192,57,43,0.18);
+}
+
+.sidebar-header {
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.sidebar-brand {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px; font-weight: 900;
+  letter-spacing: 3px; color: #fff;
+  margin-bottom: 3px;
+}
+
+.sidebar-sub { font-size: 9px; letter-spacing: 2px; color: rgba(255,255,255,0.28); }
+
+.sidebar-accent-bar { height: 2px; background: var(--red); opacity: 0.6; }
+
+.sidebar-status {
+  padding: 11px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  display: flex; align-items: center; gap: 9px;
+}
+
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--green-ok);
+  box-shadow: 0 0 6px var(--green-ok);
+  animation: blink 2s infinite; flex-shrink: 0;
+}
+@keyframes blink { 50% { opacity: 0.25; } }
+
+.status-txt { font-size: 9px; letter-spacing: 2px; color: rgba(255,255,255,0.32); }
+
+nav {
+  flex: 1; padding: 10px 0;
+  display: flex; flex-direction: column; gap: 1px;
+  overflow-y: auto;
+}
+
+nav a {
+  display: flex; align-items: center; gap: 11px;
+  padding: 11px 20px;
+  font-size: 10px; letter-spacing: 2px;
+  text-decoration: none;
+  color: rgba(255,255,255,0.38);
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+  cursor: pointer; text-transform: uppercase;
+}
+nav a:hover {
+  color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.04);
+  border-left-color: rgba(255,255,255,0.18);
+}
+nav a.active {
+  color: #fff;
+  background: rgba(192,57,43,0.14);
+  border-left-color: var(--red);
+}
+nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
+
+.sidebar-bottom {
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.sidebar-clock { font-size: 11px; color: rgba(255,255,255,0.2); letter-spacing: 1px; margin-bottom: 4px; }
+.sidebar-unit  { font-size: 8px; letter-spacing: 2px; color: rgba(192,57,43,0.45); }
+
+/* ========== MAIN ========== */
+#main { margin-left: 224px; flex: 1; min-height: 100vh; }
+
+.page {
+  display: none;
+  min-height: 100vh;
+  padding: 48px 52px 80px;
+  animation: fadeUp 0.28s ease both;
+}
+.page.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(8px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* ========== PAGE HEADER ========== */
+.page-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(192,57,43,0.4);
+}
+.ph-tag { font-size: 9px; letter-spacing: 4px; color: var(--text-muted); margin-bottom: 7px; text-transform: uppercase; }
+.ph-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(22px, 3vw, 32px); font-weight: 900;
+  letter-spacing: 4px; color: var(--text); line-height: 1.1;
+}
+.ph-badge {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 9px; letter-spacing: 3px;
+  padding: 6px 14px; border: 1px solid; text-transform: uppercase;
+}
+.ph-badge.green { color: var(--green-ok); border-color: rgba(39,174,96,0.3); background: rgba(39,174,96,0.07); }
+.ph-badge.amber { color: var(--amber); border-color: var(--amber-border); background: var(--amber-dim); }
+.ph-badge.red   { color: var(--red);   border-color: var(--red-border);   background: var(--red-dim); }
+.ph-badge .dot  { width:6px; height:6px; border-radius:50%; background: currentColor; }
+
+/* ========== CARDS ========== */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--text-muted);
+  padding: 22px; margin-bottom: 16px;
+}
+.card.accent-red   { border-top-color: var(--red); }
+.card.accent-amber { border-top-color: var(--amber); }
+.card.accent-green { border-top-color: var(--green-ok); }
+
+.card-tag { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); margin-bottom: 10px; display: block; text-transform: uppercase; }
+.card-title { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px; color: var(--text); }
+.card-body  { font-size: 13px; line-height: 1.85; color: var(--text-dim); }
+
+/* ========== GRIDS ========== */
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+
+/* ========== SKILL BARS ========== */
+.skill-bar { margin-bottom: 16px; }
+.skill-label { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 1px; margin-bottom: 5px; color: var(--text-dim); }
+.skill-pct  { color: var(--red); font-weight: bold; }
+.skill-track { height: 5px; background: var(--bg3); border: 1px solid var(--border); overflow: hidden; }
+.skill-fill { height: 100%; background: var(--red); animation: loadBar 1.2s ease-out both; transform-origin: left; }
+@keyframes loadBar { from { transform: scaleX(0); } }
+
+/* ========== TIMELINE ========== */
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before {
+  content: ''; position: absolute;
+  left: 7px; top: 6px; bottom: 0;
+  width: 1px; background: var(--red); opacity: 0.25;
+}
+.timeline-item { position: relative; margin-bottom: 36px; }
+.timeline-item::before {
+  content: ''; position: absolute;
+  left: -24px; top: 5px;
+  width: 9px; height: 9px;
+  border: 2px solid var(--text-muted);
+  background: var(--bg); transform: rotate(45deg);
+}
+.timeline-item.highlight::before { background: var(--red); border-color: var(--red); }
+.tl-date  { font-size: 9px; letter-spacing: 3px; color: var(--red); margin-bottom: 5px; text-transform: uppercase; }
+.tl-title { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; margin-bottom: 10px; color: var(--text); }
+.tl-body  { font-size: 13px; line-height: 1.85; color: var(--text-dim); }
+.tl-hi    { color: var(--red); font-weight: bold; }
+.tl-name  { color: var(--amber); }
+
+/* ========== MEMBERS ========== */
+.member-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--red);
+  padding: 18px; display: flex; flex-direction: column; gap: 8px;
+  transition: all 0.18s;
+}
+.member-card:hover {
+  border-color: var(--border-mid);
+  border-top-color: var(--red);
+  background: var(--panel2);
+  transform: translateY(-2px);
+}
+.member-rank { font-size: 8px; letter-spacing: 3px; color: var(--red); text-transform: uppercase; }
+.member-name { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--text); }
+.member-id   { font-size: 11px; color: var(--text-muted); }
+.member-role { font-size: 11px; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 8px; line-height: 1.6; }
+.badge { display: inline-block; font-size: 8px; letter-spacing: 2px; padding: 3px 8px; border: 1px solid; text-transform: uppercase; }
+.badge-red   { color: var(--red);   border-color: var(--red-border);   background: var(--red-dim); }
+.badge-amber { color: var(--amber); border-color: var(--amber-border); background: var(--amber-dim); }
+
+/* ========== EQUIPMENT ========== */
+/* Category block */
+.equip-section { margin-bottom: 36px; }
+
+.equip-section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--text);
+  padding: 10px 16px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--red);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.equip-section-title .cat-icon { font-size: 16px; }
+
+.equip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+
+.equip-item {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  transition: all 0.18s;
+  overflow: hidden;
+}
+.equip-item:hover { border-color: var(--border-mid); background: var(--panel2); }
+
+/* 3D viewer zone */
+.equip-3d {
+  width: 100%;
+  height: 220px;
+  background: #0a0a0a;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.equip-3d iframe {
+  width: 100%; height: 100%;
+  border: none;
+  display: block;
+}
+
+.equip-3d .model-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: #0a0a0a;
+  cursor: pointer;
+  transition: opacity 0.3s;
+  z-index: 2;
+}
+
+.equip-3d .model-overlay.hidden { opacity: 0; pointer-events: none; }
+
+.model-preview-icon {
+  font-size: 36px; margin-bottom: 10px;
+  filter: drop-shadow(0 0 10px rgba(192,57,43,0.5));
+}
+
+.model-preview-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 9px; letter-spacing: 3px;
+  color: var(--red); margin-bottom: 6px;
+}
+
+.model-preview-hint {
+  font-size: 10px; letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.model-badge {
+  position: absolute; bottom: 7px; right: 8px;
+  font-size: 8px; letter-spacing: 2px;
+  color: rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.6);
+  padding: 2px 7px; z-index: 3;
+  pointer-events: none;
+}
+
+.equip-info { padding: 12px 14px 14px; }
+
+.equip-code {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 8px; letter-spacing: 2px;
+  color: var(--red);
+  border: 1px solid var(--red-border);
+  padding: 2px 6px; background: var(--red-dim);
+  display: inline-block; margin-bottom: 8px;
+}
+
+.equip-name {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  margin-bottom: 6px; color: var(--text);
+}
+.equip-desc { font-size: 11px; color: var(--text-dim); line-height: 1.65; }
+
+/* ========== INFO BOX ========== */
+.info-box {
+  border: 1px solid var(--amber-border);
+  background: var(--amber-dim);
+  padding: 13px 18px; margin: 16px 0;
+  display: flex; gap: 12px; align-items: flex-start;
+  font-size: 12px; color: var(--text-dim); line-height: 1.6;
+}
+.info-box .ib-icon { color: var(--amber); flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+
+/* ========== RECRUIT ========== */
+.req-list { list-style: none; margin: 0 0 28px; }
+.req-list li {
+  font-size: 13px; padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  display: flex; gap: 12px; align-items: flex-start; line-height: 1.6;
+}
+.req-list li::before { content: '▸'; color: var(--red); font-size: 11px; margin-top: 2px; flex-shrink: 0; }
+
+.btn-recruit {
+  display: inline-block;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px; font-weight: 700; letter-spacing: 3px;
+  padding: 13px 36px;
+  border: 1px solid var(--red);
+  color: #fff; background: var(--red);
+  cursor: pointer; text-transform: uppercase; transition: all 0.18s;
+}
+.btn-recruit:hover { background: var(--red-bright); border-color: var(--red-bright); }
+
+/* ========== MOTTO BANNER ========== */
+.motto-banner {
+  background: var(--bg3);
+  color: var(--text);
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(12px, 2vw, 16px); font-weight: 700;
+  letter-spacing: 4px; text-align: center;
+  padding: 18px 30px; margin: 30px 0;
+  border-left: 4px solid var(--red);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--red);
+}
+
+/* ========== HOME ========== */
+#page-home {
+  background: #0d0d0d; color: #fff;
+  display: none; min-height: 100vh;
+  flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 60px 40px;
+  position: relative; overflow: hidden;
+}
+#page-home.active { display: flex; }
+
+.home-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(192,57,43,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(192,57,43,0.06) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+.home-scanlines {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px);
+  pointer-events: none;
+}
+.home-label { font-size: 10px; letter-spacing: 5px; color: rgba(192,57,43,0.6); margin-bottom: 20px; animation: fadeSlide 0.6s ease both; position: relative; }
+.home-wolf-icon { font-size: 56px; margin-bottom: 14px; animation: fadeSlide 0.5s ease both; position: relative; filter: drop-shadow(0 0 16px rgba(192,57,43,0.5)); }
+.home-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(42px, 9vw, 96px); font-weight: 900;
+  letter-spacing: 8px; color: #fff; line-height: 1;
+  margin-bottom: 10px;
+  animation: fadeSlide 0.6s 0.1s ease both; position: relative;
+  text-shadow: 0 0 40px rgba(192,57,43,0.25);
+}
+.home-title span { color: var(--red); }
+.home-sub {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(8px, 1.4vw, 11px); letter-spacing: 5px;
+  color: rgba(255,255,255,0.3); margin-bottom: 28px;
+  text-transform: uppercase;
+  animation: fadeSlide 0.6s 0.2s ease both; position: relative;
+}
+.home-divider { width: 80px; height: 1px; background: var(--red); margin: 0 auto 28px; opacity: 0.5; position: relative; }
+.home-motto {
+  font-family: 'VT323', monospace; font-size: 24px; letter-spacing: 3px;
+  color: rgba(255,255,255,0.6);
+  border: 1px solid rgba(192,57,43,0.2);
+  border-left: 3px solid var(--red);
+  padding: 12px 32px; margin-bottom: 46px;
+  animation: fadeSlide 0.6s 0.3s ease both; position: relative;
+  max-width: 520px;
+}
+.home-stats {
+  display: flex; gap: 1px; justify-content: center; flex-wrap: wrap;
+  animation: fadeSlide 0.6s 0.4s ease both; position: relative;
+}
+.home-stat {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 16px 30px; text-align: center; transition: all 0.2s;
+}
+.home-stat:hover { background: rgba(192,57,43,0.1); border-color: rgba(192,57,43,0.3); }
+.home-stat .val { font-family: 'Orbitron', sans-serif; font-size: 19px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.home-stat .lbl { font-size: 8px; letter-spacing: 3px; color: rgba(255,255,255,0.25); }
+.home-nav-hint { position: absolute; bottom: 36px; font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.15); animation: pulse 2.5s infinite; }
+
+@keyframes pulse    { 50% { opacity: 0.05; } }
+@keyframes fadeSlide { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform: translateY(0); } }
+
+/* ========== FOOTER ========== */
+.page-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 60px; padding-top: 18px;
+  font-size: 10px; letter-spacing: 2px; color: var(--text-muted);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.pf-red { color: var(--red); }
+
+/* ========== SCROLLBAR ========== */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 680px) {
+  #sidebar { width: 180px; }
+  #main { margin-left: 180px; }
+  .page { padding: 28px 18px 60px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ====== BOOT ====== -->
+<div id="boot">
+  <div id="boot-inner">
+    <div class="boot-logo">BLACK WOLVES</div>
+    <div class="boot-line" id="bl0"><span class="dim">■■■ BLACK WOLVES OS v2.4 — 104ème WOLFPACK — FLOTTE COSMOS ■■■</span></div>
+    <div class="boot-line" id="bl1">> Démarrage du système d'exploitation tactique...</div>
+    <div class="boot-line" id="bl2">> Vérification intégrité du noyau... <span class="ok">[ OK ]</span></div>
+    <div class="boot-line" id="bl3">> Initialisation des protocoles de sécurité niveau 4...</div>
+    <div class="boot-line" id="bl4">> Connexion satellite — Flotte Cosmos... <span class="ok">[ ÉTABLIE ]</span></div>
+    <div class="boot-line" id="bl5">> Ping serveur central 104ème Bataillon Wolfpack... <span class="ok">[ 12ms ]</span></div>
+    <div class="boot-line" id="bl6">> Vérification accréditation soldat... <span class="ok">[ AUTORISÉ ]</span></div>
+    <div class="boot-line" id="bl7">> Chargement base de données 104ème Bataillon...</div>
+    <div class="boot-line" id="bl8">> Module Effectifs — 5 soldats actifs... <span class="ok">[ CHARGÉ ]</span></div>
+    <div class="boot-line" id="bl9">> Module Équipement — Inventaire blindé lourd... <span class="ok">[ CHARGÉ ]</span></div>
+    <div class="boot-line" id="bl10">> Module Archives — Dossiers historiques... <span class="ok">[ CHARGÉ ]</span></div>
+    <div class="boot-line" id="bl11">> Module Recrutement — Protocole de sélection... <span class="ok">[ CHARGÉ ]</span></div>
+    <div class="boot-line" id="bl12">> Activation Black Wolves — Compagnie Assaut Blindé Lourd... <span class="ok">[ ACTIF ]</span></div>
+    <div class="boot-line" id="bl13">> Chiffrement des communications réseau... <span class="ok">[ AES-256 OK ]</span></div>
+    <div class="boot-line" id="bl14">> Déclassification dossiers BW-01 à BW-05... <span class="warn">[ DÉCLASSIFIÉ ]</span></div>
+    <div class="boot-line" id="bl15">> Synchronisation horloge tactique Coruscant... <span class="ok">[ SYNC ]</span></div>
+    <div class="boot-line" id="bl16">> <span class="dim">——————————————————————————————————————————</span></div>
+    <div class="boot-line" id="bl17">> <span class="hi">■ SYSTÈME OPÉRATIONNEL — BIENVENUE, SOLDAT. ■</span></div>
+    <div class="boot-bar-wrap" id="boot-bar">
+      <div class="boot-bar-label">INITIALISATION SYSTÈME... <span id="bar-pct" style="color:var(--red);">0%</span></div>
+      <div class="boot-bar-track">
+        <div class="boot-bar-fill" id="bar-fill"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SIDEBAR ====== -->
+<div id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-brand">BLACK WOLVES</div>
+    <div class="sidebar-sub">104ème WOLFPACK</div>
+  </div>
+  <div class="sidebar-accent-bar"></div>
+  <div class="sidebar-status">
+    <div class="status-dot"></div>
+    <div class="status-txt">RÉSEAU ACTIF // COSMOS</div>
+  </div>
+  <nav>
+    <a onclick="showPage('home')"         id="nav-home">        <span class="nav-icon">⬛</span> QG</a>
+    <a onclick="showPage('presentation')" id="nav-presentation"><span class="nav-icon">◈</span>  Présentation</a>
+    <a onclick="showPage('lore')"         id="nav-lore">        <span class="nav-icon">◉</span>  Archives / Lore</a>
+    <a onclick="showPage('effectifs')"    id="nav-effectifs">   <span class="nav-icon">◇</span>  Effectifs</a>
+    <a onclick="showPage('equipement')"   id="nav-equipement">  <span class="nav-icon">▣</span>  Équipement</a>
+    <a onclick="showPage('recrutement')"  id="nav-recrutement"> <span class="nav-icon">▸</span>  Recrutement</a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="sidebar-clock" id="clock">--:--:--</div>
+    <div class="sidebar-unit">104th // BW UNIT</div>
+  </div>
+</div>
+
+<!-- ====== MAIN ====== -->
+<div id="main">
+
+  <!-- HOME -->
+  <div class="page" id="page-home">
+    <div class="home-grid"></div>
+    <div class="home-scanlines"></div>
+    <div class="home-wolf-icon">🐺</div>
+    <div class="home-label">// 104ème BATAILLON WOLFPACK — FLOTTE COSMOS //</div>
+    <div class="home-title">BLACK <span>WOLVES</span></div>
+    <div class="home-sub">Compagnie d'Assaut Blindé Lourd — Grande Armée de la République</div>
+    <div class="home-divider"></div>
+    <div class="home-motto">« L'AT-TE rugit, l'ennemi faiblit ! »</div>
+    <div class="home-stats">
+      <div class="home-stat"><div class="val">104th</div><div class="lbl">Bataillon</div></div>
+      <div class="home-stat"><div class="val">ACTIF</div><div class="lbl">Statut</div></div>
+      <div class="home-stat"><div class="val">BLINDÉ</div><div class="lbl">Spécialité</div></div>
+      <div class="home-stat"><div class="val">5</div><div class="lbl">Fondateurs</div></div>
+    </div>
+    <div class="home-nav-hint">← NAVIGUEZ VIA LE MENU</div>
+  </div>
+
+  <!-- PRÉSENTATION -->
+  <div class="page" id="page-presentation">
+    <div class="page-header">
+      <div class="ph-left">
+        <div class="ph-tag">// DOSSIER DÉCLASSIFIÉ — REF. BW-01</div>
+        <div class="ph-title">PRÉSENTATION</div>
+      </div>
+      <div class="ph-badge green"><div class="dot"></div> ACTIF</div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div class="card accent-red">
+          <span class="card-tag">// Mission principale</span>
+          <div class="card-title">Force d'Assaut Blindée Lourde</div>
+          <div class="card-body">
+            La Black Wolves est l'une des quatre grandes compagnies de spécialisation du 104ème Bataillon Wolfpack. Nous sommes la force blindée lourde de la République — nos marcheurs ouvrent la voie, nos armes brisent les lignes.<br><br>
+            Quand les défenses ennemies sont impénétrables, c'est la Black Wolves qui frappe en première ligne. Nous brisons les fortifications, sécurisons les positions cruciales et protégeons nos frères d'armes dans les moments les plus critiques.
+          </div>
+        </div>
+        <div class="card accent-amber">
+          <span class="card-tag">// Devise de la compagnie</span>
+          <div class="card-title" style="color:var(--red);">« L'AT-TE rugit, l'ennemi faiblit ! »</div>
+          <div class="card-body">
+            Chaque soldat Black Wolves est une unité de destruction mobile. Nous ne reculons pas. Nous ne capitulons pas. Nous avançons jusqu'à ce que l'ennemi soit réduit en cendres.
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card accent-red">
+          <span class="card-tag">// Aptitudes de combat</span>
+          <div class="card-title">Compétences Opérationnelles</div>
+          <div class="card-body">
+            <div class="skill-bar">
+              <div class="skill-label"><span>Pilotage Marcheurs (AT-TE / TX-225 / AT-RT)</span><span class="skill-pct">95%</span></div>
+              <div class="skill-track"><div class="skill-fill" style="width:95%"></div></div>
+            </div>
+            <div class="skill-bar">
+              <div class="skill-label"><span>Artillerie Lourde (AV-7 / Canons)</span><span class="skill-pct">90%</span></div>
+              <div class="skill-track"><div class="skill-fill" style="width:90%; animation-delay:0.1s"></div></div>
+            </div>
+            <div class="skill-bar">
+              <div class="skill-label"><span>Démolition & Explosifs</span><span class="skill-pct">88%</span></div>
+              <div class="skill-track"><div class="skill-fill" style="width:88%; animation-delay:0.2s"></div></div>
+            </div>
+            <div class="skill-bar">
+              <div class="skill-label"><span>Suppression Infanterie (Z-6 Rotary)</span><span class="skill-pct">92%</span></div>
+              <div class="skill-track"><div class="skill-fill" style="width:92%; animation-delay:0.3s"></div></div>
+            </div>
+            <div class="skill-bar">
+              <div class="skill-label"><span>Piratage Systèmes CIS</span><span class="skill-pct">75%</span></div>
+              <div class="skill-track"><div class="skill-fill" style="width:75%; animation-delay:0.4s"></div></div>
+            </div>
+            <div class="skill-bar">
+              <div class="skill-label"><span>Appui Feu & Soutien Blindé</span><span class="skill-pct">93%</span></div>
+              <div class="skill-track"><div class="skill-fill" style="width:93%; animation-delay:0.5s"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer"><span>BLACK WOLVES // 104ème WOLFPACK</span><span class="pf-red">DÉCLASSIFIÉ — BW-01</span></div>
+  </div>
+
+  <!-- LORE -->
+  <div class="page" id="page-lore">
+    <div class="page-header">
+      <div class="ph-left">
+        <div class="ph-tag">// DOSSIER DÉCLASSIFIÉ — REF. BW-02</div>
+        <div class="ph-title">ARCHIVES / LORE</div>
+      </div>
+      <div class="ph-badge amber"><div class="dot"></div> HISTORIQUE</div>
+    </div>
+    <div class="info-box">
+      <span class="ib-icon">ℹ</span>
+      <span>DOSSIER DÉCLASSIFIÉ — Origine et formation de la Compagnie Black Wolves, 104ème Bataillon Wolfpack.</span>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="tl-date">Seconde Bataille de Felucia</div>
+        <div class="tl-title">L'Embuscade</div>
+        <div class="tl-body">
+          Lors de la Seconde Bataille de Felucia, le 104ème Bataillon Wolfpack et la 501ème Légion furent déployés pour reprendre la planète des mains de la CSI. Les combats atteignirent une violence extrême — chaque mètre de jungle coûtait du sang.<br><br>
+          L'aile droite de la formation du 104ème tomba dans une embuscade dévastatrice orchestrée par la Confédération. Le massacre fut total. Des dizaines de clones périrent sous les tirs de droïdes et les bombardements incessants.
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-date">Rapport de survivance — 5 clones</div>
+        <div class="tl-title">Les Cinq Survivants</div>
+        <div class="tl-body">
+          Quand le nuage de fumée se leva, seuls cinq clones avaient survécu à l'attaque :<br><br>
+          <span class="tl-name">▸ WILDFIRE</span> — Leader, commandant de l'opération de survie<br>
+          <span class="tl-name">▸ FENRIR</span> — Expert démolition et explosifs<br>
+          <span class="tl-name">▸ SPITTER</span> — Soldat d'élite, pilote de combat<br>
+          <span class="tl-name">▸ BOLT</span> — Stratège tactique<br>
+          <span class="tl-name">▸ MOUSE</span> — Technicien, ingénieur de génie
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="tl-date">Opération contre-attaque</div>
+        <div class="tl-title">Cinq contre un bataillon</div>
+        <div class="tl-body">
+          Piégés derrière les lignes ennemies, sans soutien ni ravitaillement, les cinq clones refusèrent d'abandonner. Mouse détourna des cargaisons d'explosifs CIS. Spitter remit en marche un AT-TE abandonné et servit de diversion. Fenrir piegea les cargaisons de ravitaillement. L'explosion fut visible à plusieurs kilomètres — un bataillon entier anéanti.
+        </div>
+      </div>
+      <div class="timeline-item highlight">
+        <div class="tl-date">Naissance d'une légende</div>
+        <div class="tl-title">Les Black Wolves</div>
+        <div class="tl-body">
+          Ce qui devait être une défaite devint une victoire. À leur retour, les cinq survivants furent accueillis en héros et surnommés : <span class="tl-hi">LES BLACK WOLVES</span>.<br><br>
+          En reconnaissance de leurs actions, ils fondèrent leur propre compagnie, spécialisée dans le pilotage de blindés et l'utilisation d'explosifs. Depuis ce jour, leur nom inspire le respect dans toute la Grande Armée de la République.
+        </div>
+      </div>
+    </div>
+    <div class="page-footer"><span>BLACK WOLVES // 104ème WOLFPACK</span><span class="pf-red">DÉCLASSIFIÉ — BW-02</span></div>
+  </div>
+
+  <!-- EFFECTIFS -->
+  <div class="page" id="page-effectifs">
+    <div class="page-header">
+      <div class="ph-left">
+        <div class="ph-tag">// DOSSIER DÉCLASSIFIÉ — REF. BW-03</div>
+        <div class="ph-title">EFFECTIFS</div>
+      </div>
+      <div class="ph-badge green"><div class="dot"></div> À JOUR</div>
+    </div>
+    <div class="grid-3">
+      <div class="member-card">
+        <div class="member-rank">▲ Fondateur</div>
+        <div class="member-name">WILDFIRE</div>
+        <div class="member-id">Commandant — Black Wolves</div>
+        <div class="member-role">Leadership & Commandement opérationnel de la compagnie</div>
+        <span class="badge badge-red">FONDATEUR</span>
+      </div>
+      <div class="member-card">
+        <div class="member-rank">▲ Fondateur</div>
+        <div class="member-name">FENRIR</div>
+        <div class="member-id">Spécialiste Démolition</div>
+        <div class="member-role">Explosifs, Charges, Neutralisation de fortifications</div>
+        <span class="badge badge-red">FONDATEUR</span>
+      </div>
+      <div class="member-card">
+        <div class="member-rank">▲ Fondateur</div>
+        <div class="member-name">SPITTER</div>
+        <div class="member-id">Pilote de Combat</div>
+        <div class="member-role">AT-TE, TX-225, Manœuvres blindées en terrain hostile</div>
+        <span class="badge badge-red">FONDATEUR</span>
+      </div>
+      <div class="member-card">
+        <div class="member-rank">▲ Fondateur</div>
+        <div class="member-name">BOLT</div>
+        <div class="member-id">Stratège Tactique</div>
+        <div class="member-role">Planification d'opérations, Analyse de terrain</div>
+        <span class="badge badge-red">FONDATEUR</span>
+      </div>
+      <div class="member-card">
+        <div class="member-rank">▲ Fondateur</div>
+        <div class="member-name">MOUSE</div>
+        <div class="member-id">Technicien / Pirate Informatique</div>
+        <div class="member-role">Systèmes CIS, Réparations de terrain, Ingénierie</div>
+        <span class="badge badge-red">FONDATEUR</span>
+      </div>
+      <div class="member-card" style="border-style:dashed; border-top-style:dashed; opacity:0.35; align-items:center; justify-content:center; min-height:160px; text-align:center; gap:6px;">
+        <div style="font-size:10px; letter-spacing:3px; color:var(--text-muted);">SLOT DISPONIBLE</div>
+        <div style="font-size:11px; color:var(--text-muted);">Rejoignez la meute</div>
+      </div>
+    </div>
+    <div style="margin-top:20px; font-size:10px; letter-spacing:2px; color:var(--text-muted); text-align:center; padding:14px; border:1px solid var(--border); background:var(--panel);">
+      EFFECTIF ACTUEL : <span style="color:var(--red);">5 MEMBRES ACTIFS</span>
+    </div>
+    <div class="page-footer"><span>BLACK WOLVES // 104ème WOLFPACK</span><span class="pf-red">DÉCLASSIFIÉ — BW-03</span></div>
+  </div>
+
+  <!-- ÉQUIPEMENT -->
+  <div class="page" id="page-equipement">
+    <div class="page-header">
+      <div class="ph-left">
+        <div class="ph-tag">// DOSSIER DÉCLASSIFIÉ — REF. BW-04</div>
+        <div class="ph-title">ÉQUIPEMENT</div>
+      </div>
+      <div class="ph-badge amber"><div class="dot"></div> INVENTAIRE</div>
+    </div>
+
+    <div class="info-box" style="margin-bottom:24px;">
+      <span class="ib-icon">↺</span>
+      <span>Modèles 3D interactifs — <strong style="color:var(--text);">Cliquez sur un modèle</strong> pour le charger, puis faites-le tourner à la souris. Via Sketchfab.</span>
+    </div>
+
+    <!-- SECTION 1 : ÉQUIPEMENT INDIVIDUEL -->
+    <div class="equip-section">
+      <div class="equip-section-title">
+        <span class="cat-icon">🪖</span> Équipement Individuel
+      </div>
+      <div class="equip-grid">
+
+        <div class="equip-item">
+          <div class="equip-3d">
+            <iframe id="sf-dc15a" data-src="https://sketchfab.com/models/133cbdfdf0ae41078a7c5f1f93b7a7a4/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
+            <div class="model-overlay" onclick="loadModel('sf-dc15a')">
+              <div class="model-preview-icon">🔫</div>
+              <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
+              <div class="model-preview-hint">▶ Cliquer pour charger</div>
+            </div>
+            <span class="model-badge">SKETCHFAB</span>
+          </div>
+          <div class="equip-info">
+            <div class="equip-code">DC-15A</div>
+            <div class="equip-name">DC-15A Blaster Rifle</div>
+            <div class="equip-desc">Fusil blaster standard des soldats clones. Précision longue portée, fiable dans tous les environnements de combat.</div>
+          </div>
+        </div>
+
+        <div class="equip-item">
+          <div class="equip-3d">
+            <iframe id="sf-z6" data-src="https://sketchfab.com/models/003791d3a53d4d2facb46f9325ca83da/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
+            <div class="model-overlay" onclick="loadModel('sf-z6')">
+              <div class="model-preview-icon">⚙️</div>
+              <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
+              <div class="model-preview-hint">▶ Cliquer pour charger</div>
+            </div>
+            <span class="model-badge">SKETCHFAB</span>
+          </div>
+          <div class="equip-info">
+            <div class="equip-code">Z-6</div>
+            <div class="equip-name">Z-6 Rotary Blaster Cannon</div>
+            <div class="equip-desc">Mitrailleuse rotative 6 canons. Cadence de tir dévastatrice. Supprime les vagues d'infanterie droïde.</div>
+          </div>
+        </div>
+
+        <div class="equip-item">
+          <div class="equip-3d" style="display:flex; align-items:center; justify-content:center;">
+            <div style="text-align:center; padding:20px;">
+              <div style="font-size:32px; margin-bottom:10px;">💣</div>
+              <div style="font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:2px; color:var(--red); margin-bottom:6px;">DONNÉES TACTIQUES</div>
+              <div style="font-size:10px; color:var(--text-muted); letter-spacing:1px;">Modèle non disponible<br>sur plateforme publique</div>
+            </div>
+          </div>
+          <div class="equip-info">
+            <div class="equip-code">EXP</div>
+            <div class="equip-name">Charges Explosives & Détonateurs</div>
+            <div class="equip-desc">Spécialité signature des Black Wolves depuis Felucia. Neutralisation de fortifications, sabotage de ravitaillement ennemi.</div>
+          </div>
+        </div>
+
+        <div class="equip-item">
+          <div class="equip-3d" style="display:flex; align-items:center; justify-content:center;">
+            <div style="text-align:center; padding:20px;">
+              <div style="font-size:32px; margin-bottom:10px;">💻</div>
+              <div style="font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:2px; color:var(--red); margin-bottom:6px;">DONNÉES TACTIQUES</div>
+              <div style="font-size:10px; color:var(--text-muted); letter-spacing:1px;">Modèle non disponible<br>sur plateforme publique</div>
+            </div>
+          </div>
+          <div class="equip-info">
+            <div class="equip-code">SYS</div>
+            <div class="equip-name">Kit Piratage Systèmes CIS</div>
+            <div class="equip-desc">Outil technique spécialisé. Détourne, perturbe ou désactive les réseaux de commandement droïdes ennemis.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 2 : VÉHICULES & MARCHEURS -->
+    <div class="equip-section">
+      <div class="equip-section-title">
+        <span class="cat-icon">🦾</span> Véhicules & Marcheurs
+      </div>
+      <div class="equip-grid">
+
+        <div class="equip-item">
+          <div class="equip-3d">
+            <iframe id="sf-atte" data-src="https://sketchfab.com/models/81ef81cf6c554055b741b43a1a08d69f/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
+            <div class="model-overlay" onclick="loadModel('sf-atte')">
+              <div class="model-preview-icon">🦿</div>
+              <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
+              <div class="model-preview-hint">▶ Cliquer pour charger</div>
+            </div>
+            <span class="model-badge">SKETCHFAB</span>
+          </div>
+          <div class="equip-info">
+            <div class="equip-code">AT-TE</div>
+            <div class="equip-name">All Terrain Tactical Enforcer</div>
+            <div class="equip-desc">Marcheur blindé lourd à 6 pattes. Canon laser ventral + 6 canons laser de flanc. Colonne vertébrale de la compagnie.</div>
+          </div>
+        </div>
+
+        <div class="equip-item">
+          <div class="equip-3d">
+            <iframe id="sf-tx225" data-src="https://sketchfab.com/models/f1ef52168cc2483e9369899ff532b21f/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
+            <div class="model-overlay" onclick="loadModel('sf-tx225')">
+              <div class="model-preview-icon">🚜</div>
+              <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
+              <div class="model-preview-hint">▶ Cliquer pour charger</div>
+            </div>
+            <span class="model-badge">SKETCHFAB</span>
+          </div>
+          <div class="equip-info">
+            <div class="equip-code">TX-225</div>
+            <div class="equip-name">Occupier Combat Assault Tank</div>
+            <div class="equip-desc">Véhicule de combat rapide à chenilles. Idéal pour les assauts urbains et la percée de lignes défensives.</div>
+          </div>
+        </div>
+
+        <div class="equip-item">
+          <div class="equip-3d">
+            <iframe id="sf-atrt" data-src="https://sketchfab.com/models/22ef70d90e834539ac4e6c790acba8dd/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
+            <div class="model-overlay" onclick="loadModel('sf-atrt')">
+              <div class="model-preview-icon">🤖</div>
+              <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
+              <div class="model-preview-hint">▶ Cliquer pour charger</div>
+            </div>
+            <span class="model-badge">SKETCHFAB</span>
+          </div>
+          <div class="equip-info">
+            <div class="equip-code">AT-RT</div>
+            <div class="equip-name">All Terrain Recon Transport</div>
+            <div class="equip-desc">Marcheur léger bipède monoplace. Mobilité maximale pour la reconnaissance et le harcèlement d'infanterie.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 3 : CANONS & ARTILLERIE LOURDE -->
+    <div class="equip-section">
+      <div class="equip-section-title">
+        <span class="cat-icon">💥</span> Canons & Artillerie Lourde
+      </div>
+      <div class="equip-grid">
+
+        <div class="equip-item">
+          <div class="equip-3d">
+            <iframe id="sf-av7" data-src="https://sketchfab.com/models/e4f819a9c71d4f3fbc76d6b4a2a9bbac/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
+            <div class="model-overlay" onclick="loadModel('sf-av7')">
+              <div class="model-preview-icon">🎯</div>
+              <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
+              <div class="model-preview-hint">▶ Cliquer pour charger</div>
+            </div>
+            <span class="model-badge">SKETCHFAB</span>
+          </div>
+          <div class="equip-info">
+            <div class="equip-code">AV-7</div>
+            <div class="equip-name">AV-7 Antivehicle Cannon</div>
+            <div class="equip-desc">Canon d'artillerie lourde antiblindé. Longue portée. Soutien indirect pour troupes au sol. Détruit tout véhicule ennemi.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="page-footer"><span>BLACK WOLVES // 104ème WOLFPACK</span><span class="pf-red">DÉCLASSIFIÉ — BW-04</span></div>
+  </div>
+
+  <!-- RECRUTEMENT -->
+  <div class="page" id="page-recrutement">
+    <div class="page-header">
+      <div class="ph-left">
+        <div class="ph-tag">// DOSSIER DÉCLASSIFIÉ — REF. BW-05</div>
+        <div class="ph-title">RECRUTEMENT</div>
+      </div>
+      <div class="ph-badge green"><div class="dot"></div> SÉLECTION OUVERTE</div>
+    </div>
+    <div class="motto-banner">« LA MEUTE NE RECRUTE PAS DES SOLDATS — ELLE FORGE DES GUERRIERS »</div>
+    <div class="grid-2">
+      <div>
+        <div class="card accent-red">
+          <span class="card-tag">// Protocole de sélection</span>
+          <div class="card-title">Conditions d'Accès</div>
+          <div class="card-body">
+            La Black Wolves ne recrute pas des soldats ordinaires. Nous cherchons des guerriers capables de piloter les machines de guerre les plus lourdes, de survivre derrière les lignes ennemies et de faire pencher la balance d'une bataille entière.
+          </div>
+        </div>
+        <ul class="req-list">
+          <li>Maîtrise du pilotage de marcheurs blindés (AT-TE, TX-225, AT-RT) ou volonté de formation</li>
+          <li>Capacité à opérer sous pression extrême et sans soutien extérieur</li>
+          <li>Esprit d'équipe — la meute est plus forte que l'individu</li>
+          <li>Compétences en démolition, artillerie ou technique sont un atout majeur</li>
+          <li>Loyauté absolue envers le 104ème Bataillon Wolfpack et la République</li>
+          <li>Contact direct requis avec un membre gradé de la Black Wolves</li>
+        </ul>
+        <button class="btn-recruit" onclick="alert('Contact direct requis avec un membre Black Wolves. Approchez un soldat gradé en service.')">
+          ▸ INITIER PROTOCOLE DE CONTACT
+        </button>
+      </div>
+      <div>
+        <div class="info-box">
+          <span class="ib-icon">!</span>
+          <span>AUCUNE CANDIDATURE ÉLECTRONIQUE ACCEPTÉE. Approchez un membre en service actif pour initier la procédure de sélection.</span>
+        </div>
+        <div class="card accent-amber">
+          <span class="card-tag">// Voie d'avancement</span>
+          <div class="card-title">Progression au sein de la Meute</div>
+          <div class="card-body">
+            Rejoindre la Black Wolves n'est que le début. Les soldats démontrant une initiative exceptionnelle et des aptitudes de commandement peuvent accéder à des grades supérieurs et être recommandés pour des programmes d'élite au sein du 104ème Bataillon.
+          </div>
+        </div>
+        <div class="card accent-red">
+          <span class="card-tag">// Code de la meute</span>
+          <div class="card-title">Valeurs Black Wolves</div>
+          <div class="card-body">
+            <span style="color:var(--red);">▸ LOYAUTÉ</span> — envers la République et la meute<br>
+            <span style="color:var(--red);">▸ PUISSANCE</span> — blindage, feu, démolition<br>
+            <span style="color:var(--red);">▸ FRATERNITÉ</span> — la meute survit ensemble<br>
+            <span style="color:var(--red);">▸ RÉSILIENCE</span> — nés à Felucia, forgés par la bataille
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-footer"><span>BLACK WOLVES // 104ème WOLFPACK</span><span class="pf-red">DÉCLASSIFIÉ — BW-05</span></div>
+  </div>
+
+</div><!-- /#main -->
+
+<script>
+// BOOT
+// Boot lines: 18 lignes étalées sur ~9 secondes
+const bootLines = [
+  {id:'bl0',  delay: 100},
+  {id:'bl1',  delay: 600},
+  {id:'bl2',  delay: 1100},
+  {id:'bl3',  delay: 1700},
+  {id:'bl4',  delay: 2300},
+  {id:'bl5',  delay: 2900},
+  {id:'bl6',  delay: 3400},
+  {id:'bl7',  delay: 3900},
+  {id:'bl8',  delay: 4500},
+  {id:'bl9',  delay: 5000},
+  {id:'bl10', delay: 5500},
+  {id:'bl11', delay: 6000},
+  {id:'bl12', delay: 6500},
+  {id:'bl13', delay: 7000},
+  {id:'bl14', delay: 7500},
+  {id:'bl15', delay: 8000},
+  {id:'bl16', delay: 8400},
+  {id:'bl17', delay: 8700},
+];
+bootLines.forEach(({id,delay}) => setTimeout(() => { const el=document.getElementById(id); if(el) el.classList.add('show'); }, delay));
+
+// Barre de progression animée dès le départ avec pourcentage live
+setTimeout(() => {
+  const bar = document.getElementById('boot-bar');
+  if(bar) bar.classList.add('show');
+}, 400);
+
+// Pourcentage qui monte progressivement sur ~8.5 secondes
+let pct = 0;
+const totalDuration = 8500;
+const startTime = Date.now() + 400;
+function animatePct() {
+  const elapsed = Date.now() - startTime;
+  const progress = Math.min(elapsed / totalDuration, 1);
+  // Courbe légèrement irrégulière pour effet réaliste
+  const eased = progress < 0.5
+    ? 2 * progress * progress
+    : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+  const val = Math.floor(eased * 100);
+  const pctEl = document.getElementById('bar-pct');
+  const fillEl = document.getElementById('bar-fill');
+  if(pctEl) pctEl.textContent = val + '%';
+  if(fillEl) fillEl.style.width = val + '%';
+  if(progress < 1) requestAnimationFrame(animatePct);
+  else {
+    if(pctEl) pctEl.textContent = '100%';
+    if(fillEl) fillEl.style.width = '100%';
+  }
+}
+setTimeout(animatePct, 400);
+
+// Fermeture après ~10.5 secondes
+setTimeout(() => {
+  const b = document.getElementById('boot');
+  b.style.transition = 'opacity 0.9s';
+  b.style.opacity = '0';
+  setTimeout(() => { b.style.display = 'none'; }, 900);
+  showPage('home');
+}, 10500);
+
+// NAV
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  const page = document.getElementById('page-'+id);
+  if(page) page.classList.add('active');
+  const nav = document.getElementById('nav-'+id);
+  if(nav) nav.classList.add('active');
+}
+
+// CLOCK
+function updateClock() {
+  const now=new Date(), p=n=>String(n).padStart(2,'0');
+  document.getElementById('clock').textContent = p(now.getHours())+':'+p(now.getMinutes())+':'+p(now.getSeconds());
+}
+setInterval(updateClock,1000); updateClock();
+</script>
+</body>
+</html>
