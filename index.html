@@ -452,14 +452,16 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 /* ========== DASHBOARD ========== */
 #dashboard {
   position: fixed;
-  inset: 0;
+  top: 0; right: 0; bottom: 0;
+  left: 224px;            /* laisse la sidebar visible */
   background: var(--bg);
-  z-index: 500;
+  z-index: 90;            /* sous la sidebar (z-index 100) */
   display: none;
   flex-direction: column;
   animation: fadeUp 0.3s ease;
 }
 #dashboard.active { display: flex; }
+@media (max-width: 680px) { #dashboard { left: 180px; } }
 
 .dash-topbar {
   background: var(--sidebar-bg);
@@ -569,6 +571,62 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   .dash-form-grid { grid-template-columns: 1fr; }
   .dash-tab { padding: 12px 12px; font-size: 9px; }
 }
+
+/* ========== LOGIN COUNTDOWN ========== */
+#login-countdown {
+  position: fixed; inset: 0;
+  background: #080808;
+  z-index: 600;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'VT323', monospace;
+  color: var(--red);
+  text-align: center;
+  padding: 40px;
+}
+#login-countdown.active { display: flex; }
+
+.lc-scanlines {
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px);
+  pointer-events: none;
+}
+.lc-status {
+  font-size: 16px; letter-spacing: 4px;
+  color: #27c93f; margin-bottom: 8px; position: relative;
+}
+.lc-user {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(18px, 4vw, 30px); font-weight: 900;
+  letter-spacing: 4px; color: #fff; margin-bottom: 30px;
+  position: relative; text-shadow: 0 0 20px rgba(192,57,43,0.4);
+}
+.lc-ring {
+  position: relative; width: 180px; height: 180px; margin-bottom: 24px;
+}
+.lc-ring svg { transform: rotate(-90deg); }
+.lc-ring .lc-track { fill: none; stroke: rgba(192,57,43,0.15); stroke-width: 6; }
+.lc-ring .lc-prog  { fill: none; stroke: var(--red); stroke-width: 6; stroke-linecap: round;
+  filter: drop-shadow(0 0 6px rgba(192,57,43,0.6)); transition: stroke-dashoffset 1s linear; }
+.lc-num {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: 'Orbitron', sans-serif; font-size: 64px; font-weight: 900; color: #fff;
+}
+.lc-msg { font-size: 16px; letter-spacing: 2px; color: var(--text-dim); min-height: 22px; position: relative; }
+.lc-bar-track {
+  width: 320px; max-width: 80vw; height: 8px; border: 1px solid rgba(192,57,43,0.3);
+  background: #0f0f0f; margin: 18px 0 10px; position: relative; overflow: hidden;
+}
+.lc-bar-fill { height: 100%; background: var(--red); width: 0; transition: width 1s linear; }
+.lc-skip {
+  margin-top: 20px; font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; letter-spacing: 2px; color: var(--text-muted);
+  background: transparent; border: 1px solid var(--border-mid); padding: 8px 18px;
+  cursor: pointer; text-transform: uppercase; transition: all 0.18s; position: relative;
+}
+.lc-skip:hover { color: #fff; border-color: var(--red); }
 
 /* ========== INFO BOX ========== */
 .info-box {
@@ -702,6 +760,70 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   .page { padding: 28px 18px 60px; }
 }
 </style>
+<!-- ====== FIREBASE ====== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+    signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc,
+    deleteDoc, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCmPRl_KnfsF1ugurtbCzEHB264E71e9X0",
+    authDomain: "blackwolves-38e5b.firebaseapp.com",
+    databaseURL: "https://blackwolves-38e5b-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "blackwolves-38e5b",
+    storageBucket: "blackwolves-38e5b.firebasestorage.app",
+    messagingSenderId: "119478170408",
+    appId: "1:119478170408:web:e6695d38ce48d5fda3d61d"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // App secondaire : permet de créer un compte SANS déconnecter l'admin
+  const app2 = initializeApp(firebaseConfig, 'secondary');
+  const auth2 = getAuth(app2);
+
+  // Expose une API simple au reste du site (script non-module)
+  window.FB = {
+    auth, db,
+    signIn: (email, pw) => signInWithEmailAndPassword(auth, email, pw),
+    createUser: async (email, pw) => {
+      const cred = await createUserWithEmailAndPassword(auth2, email, pw);
+      const uid = cred.user.uid;
+      await signOut(auth2);   // l'admin reste connecté sur l'app principale
+      return uid;
+    },
+    signOut: () => signOut(auth),
+    onAuth: (cb) => onAuthStateChanged(auth, cb),
+    getRole: async (uid) => {
+      try { const s = await getDoc(doc(db, 'roles', uid)); return s.exists() ? (s.data().role || 'membre') : 'membre'; }
+      catch(e){ return 'membre'; }
+    },
+    setRole: (uid, role) => setDoc(doc(db, 'roles', uid), { role }),
+    // Effectifs
+    watchEffectifs: (cb) => onSnapshot(collection(db, 'effectifs'), s => cb(s.docs.map(d => ({ _id:d.id, ...d.data() })))),
+    addEffectif: (m) => addDoc(collection(db, 'effectifs'), m),
+    delEffectif: (id) => deleteDoc(doc(db, 'effectifs', id)),
+    // Équipements
+    watchEquip: (cb) => onSnapshot(collection(db, 'equipements'), s => cb(s.docs.map(d => ({ _id:d.id, ...d.data() })))),
+    addEquip: (e) => addDoc(collection(db, 'equipements'), e),
+    delEquip: (id) => deleteDoc(doc(db, 'equipements', id)),
+    // Comptes (registre des membres créés — pour la liste; rôle dans /roles)
+    watchComptes: (cb) => onSnapshot(collection(db, 'comptes'), s => cb(s.docs.map(d => ({ _id:d.id, ...d.data() })))),
+    addCompte: (uid, c) => setDoc(doc(db, 'comptes', uid), c),
+    delCompte: (uid) => deleteDoc(doc(db, 'comptes', uid)),
+    ready: true
+  };
+  document.dispatchEvent(new Event('fb-ready'));
+</script>
+
 </head>
 <body>
 
@@ -755,6 +877,7 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
     <a onclick="showPage('equipement')"   id="nav-equipement">  <span class="nav-icon">▣</span>  Équipement</a>
     <a onclick="showPage('recrutement')"  id="nav-recrutement"> <span class="nav-icon">▸</span>  Recrutement</a>
     <a onclick="showPage('terminal')"     id="nav-terminal">    <span class="nav-icon">▌</span>  Terminal</a>
+    <a onclick="showDashboard()" id="nav-dashboard" style="display:none; color:#fff; background:rgba(192,57,43,0.14); border-left-color:var(--red);"><span class="nav-icon">★</span>  Commandement</a>
   </nav>
   <div class="sidebar-bottom">
     <div class="sidebar-clock" id="clock">--:--:--</div>
@@ -1100,14 +1223,14 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
       <div class="dash-section-title">Gestion des Comptes</div>
       <div class="info-box">
         <span class="ib-icon">ℹ</span>
-        <span>Comptes stockés <strong style="color:var(--text);">hors du code</strong> (dans le navigateur). Accès roleplay uniquement — n'utilisez pas de vrais mots de passe sensibles.</span>
+        <span>Comptes gérés par <strong style="color:var(--text);">Firebase</strong> : partagés entre tous les membres, mots de passe chiffrés côté serveur. Vous créez les comptes ici, en tant qu'admin.</span>
       </div>
       <div id="dash-comptes-list"></div>
       <div class="dash-form">
         <div class="dash-form-title">+ Créer un compte</div>
         <div class="dash-form-grid">
-          <div class="dash-field"><label>Identifiant</label><input id="f-acc-id" placeholder="ex: spitter" autocomplete="off"></div>
-          <div class="dash-field"><label>Mot de passe</label><input id="f-acc-pw" placeholder="mot de passe" autocomplete="off"></div>
+          <div class="dash-field"><label>E-mail</label><input id="f-acc-id" placeholder="ex: spitter@blackwolves.gg" autocomplete="off"></div>
+          <div class="dash-field"><label>Mot de passe (min. 6 car.)</label><input id="f-acc-pw" placeholder="mot de passe" autocomplete="off"></div>
         </div>
         <div class="dash-field"><label>Rôle</label>
           <select id="f-acc-role">
@@ -1127,14 +1250,31 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
         <div class="dash-stat"><div class="v" id="stat-equip">0</div><div class="l">Équipements</div></div>
         <div class="dash-stat"><div class="v">v2.4</div><div class="l">Version OS</div></div>
       </div>
-      <div class="info-box" style="border-color:var(--red-border); background:var(--red-dim);">
-        <span class="ib-icon" style="color:var(--red);">!</span>
-        <span>La <strong style="color:var(--text);">réinitialisation</strong> efface tous les ajouts et restaure les données d'origine de la compagnie. Action irréversible.</span>
+      <div class="info-box">
+        <span class="ib-icon">ℹ</span>
+        <span>À la <strong style="color:var(--text);">première installation</strong>, la base partagée est vide. Importez les effectifs et équipements par défaut (les 5 fondateurs + l'inventaire) en un clic. À n'utiliser qu'une seule fois.</span>
       </div>
-      <button class="dash-add-btn" style="background:transparent; border-color:var(--red); color:var(--red);" onclick="resetData()">↺ Réinitialiser les données</button>
+      <button class="dash-add-btn" onclick="resetData()">▸ Importer les données par défaut</button>
     </div>
 
   </div>
+</div>
+
+<!-- ====== ÉCRAN DE CONNEXION (compte à rebours 10s) ====== -->
+<div id="login-countdown">
+  <div class="lc-scanlines"></div>
+  <div class="lc-status">● ACCÈS AUTORISÉ — CONNEXION ÉTABLIE</div>
+  <div class="lc-user" id="lc-user">SOLDAT</div>
+  <div class="lc-ring">
+    <svg width="180" height="180" viewBox="0 0 180 180">
+      <circle class="lc-track" cx="90" cy="90" r="80"></circle>
+      <circle class="lc-prog" id="lc-prog" cx="90" cy="90" r="80"></circle>
+    </svg>
+    <div class="lc-num" id="lc-num">10</div>
+  </div>
+  <div class="lc-bar-track"><div class="lc-bar-fill" id="lc-bar"></div></div>
+  <div class="lc-msg" id="lc-msg">Initialisation du panneau de commandement...</div>
+  <button class="lc-skip" id="lc-skip">▸ Accéder maintenant</button>
 </div>
 
 <script>
@@ -1203,12 +1343,25 @@ setTimeout(() => {
 
 // NAV
 function showPage(id) {
+  // quitte la vue dashboard si on navigue vers une page normale
+  const dash = document.getElementById('dashboard');
+  if (dash) dash.classList.remove('active');
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
   const page = document.getElementById('page-'+id);
   if(page) page.classList.add('active');
   const nav = document.getElementById('nav-'+id);
   if(nav) nav.classList.add('active');
+}
+
+// Affiche la vue Commandement (dashboard) comme une catégorie à part entière
+function showDashboard() {
+  if (!currentUser) return;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  const nav = document.getElementById('nav-dashboard');
+  if (nav) nav.classList.add('active');
+  openDashboard();
 }
 
 // LOAD 3D MODEL (Sketchfab lazy load)
@@ -1221,16 +1374,10 @@ function loadModel(iframeId) {
 }
 
 /* ============================================================
-   DONNÉES — Effectifs & Équipements (persistance localStorage)
+   DONNÉES — Effectifs & Équipements (partagés via Firebase Firestore)
    ============================================================ */
 
-// >>> IDENTIFIANTS DE CONNEXION (modifiez ici) <<<
-// Format de commande dans le terminal : connexion_IDENTIFIANT_MOTDEPASSE
-const CREDENTIALS = {
-  'wildfire': 'blackwolves',   // commandant
-  'admin':    'cosmos104'      // accès admin
-};
-
+// Données par défaut — utilisées UNIQUEMENT pour le bouton "Importer" (1ère installation)
 const DEFAULT_DATA = {
   effectifs: [
     { rank:'▲ Fondateur', name:'WILDFIRE', id:'Commandant — Black Wolves', role:'Leadership & Commandement opérationnel de la compagnie', badge:'FONDATEUR' },
@@ -1248,32 +1395,11 @@ const DEFAULT_DATA = {
     { cat:'vehicule', code:'TX-225', name:'Occupier Combat Assault Tank', desc:'Véhicule de combat rapide à chenilles. Idéal pour les assauts urbains et la percée de lignes défensives.', icon:'🚜', sf:'f1ef52168cc2483e9369899ff532b21f' },
     { cat:'vehicule', code:'AT-RT', name:'All Terrain Recon Transport', desc:"Marcheur léger bipède monoplace. Mobilité maximale pour la reconnaissance et le harcèlement d'infanterie.", icon:'🤖', sf:'22ef70d90e834539ac4e6c790acba8dd' },
     { cat:'canon', code:'AV-7', name:'AV-7 Antivehicle Cannon', desc:"Canon d'artillerie lourde antiblindé. Longue portée. Soutien indirect pour troupes au sol. Détruit tout véhicule ennemi.", icon:'🎯', sf:'' }
-  ],
-  comptes: []   // comptes créés hors-code (stockés dans le navigateur)
+  ]
 };
 
-const STORE_KEY = 'blackwolves_data_v1';
-let memFallback = null; // si localStorage indisponible
-
-function loadData() {
-  let d;
-  try {
-    const raw = localStorage.getItem(STORE_KEY);
-    d = raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(DEFAULT_DATA));
-  } catch(e) {
-    d = memFallback || JSON.parse(JSON.stringify(DEFAULT_DATA));
-  }
-  // compatibilité : garantir les champs
-  if (!Array.isArray(d.effectifs)) d.effectifs = JSON.parse(JSON.stringify(DEFAULT_DATA.effectifs));
-  if (!Array.isArray(d.equipements)) d.equipements = JSON.parse(JSON.stringify(DEFAULT_DATA.equipements));
-  if (!Array.isArray(d.comptes)) d.comptes = [];
-  return d;
-}
-function saveData(d) {
-  memFallback = d;
-  try { localStorage.setItem(STORE_KEY, JSON.stringify(d)); } catch(e) {}
-}
-let DATA = loadData();
+// Miroir en mémoire, alimenté en temps réel par Firestore
+let DATA = { effectifs: [], equipements: [], comptes: [] };
 
 // échappement HTML
 function esc(s) {
@@ -1348,18 +1474,11 @@ function renderAll() { renderEffectifs(); renderEquipements(); }
 /* ============================================================
    TERMINAL
    ============================================================ */
-let currentUser = null;
+let currentUser = null;   // email
 let currentRole = null;
+let currentUid = null;
 let cmdHistory = [];
 let histIdx = -1;
-
-// vérifie les comptes (localStorage) puis les admins de secours (CREDENTIALS)
-function authenticate(id, pw) {
-  const acc = DATA.comptes.find(c => c.id.toLowerCase() === id);
-  if (acc && acc.pw === pw) return { ok:true, role: acc.role || 'membre' };
-  if (CREDENTIALS[id] && CREDENTIALS[id] === pw) return { ok:true, role:'admin' };
-  return { ok:false };
-}
 
 function focusTerm() { const i = document.getElementById('term-input'); if(i) i.focus(); }
 
@@ -1375,32 +1494,27 @@ function termPrint(text, cls) {
 
 function termRunCommand(raw) {
   const cmd = raw.trim();
-  // affiche la ligne saisie
-  const label = currentUser ? ('C:\\BLACKWOLVES\\' + currentUser.toUpperCase() + '>') : 'C:\\BLACKWOLVES>';
+  const label = currentUser ? ('C:\\BLACKWOLVES\\' + shortUser(currentUser) + '>') : 'C:\\BLACKWOLVES>';
   termPrint(esc(label) + ' ' + esc(cmd), 'term-out-white');
   if (!cmd) return;
 
   cmdHistory.push(cmd); histIdx = cmdHistory.length;
   const lower = cmd.toLowerCase();
 
-  // commande de connexion : connexion_id_mdp
+  // commande de connexion : connexion_email_motdepasse  (ou avec espaces)
   if (lower.startsWith('connexion_') || lower.startsWith('connexion ')) {
-    const sep = cmd.includes('_') ? '_' : ' ';
-    const parts = cmd.split(sep);
-    // connexion _ id _ mdp  -> parts = [connexion, id, mdp...]
-    const id = (parts[1] || '').toLowerCase();
-    const pw = parts.slice(2).join(sep);
-    const auth = authenticate(id, pw);
-    if (auth.ok) {
-      currentUser = id;
-      currentRole = auth.role;
-      termPrint('Authentification réussie. Bienvenue, <span class="term-out-white">' + esc(id.toUpperCase()) + '</span> [' + esc(auth.role) + '].', 'term-out-green');
-      termPrint('Ouverture du panneau de commandement...', 'term-out-dim');
-      document.getElementById('term-prompt-label').textContent = 'C:\\BLACKWOLVES\\' + currentUser.toUpperCase() + '>';
-      setTimeout(openDashboard, 600);
-    } else {
-      termPrint("ACCÈS REFUSÉ — identifiant ou mot de passe incorrect.", 'term-out-red');
-    }
+    let rest = cmd.slice('connexion'.length).replace(/^[_ ]/, '');
+    const sep = rest.includes(' ') ? ' ' : '_';
+    const email = rest.split(sep)[0];
+    const pw = rest.slice(email.length + 1);
+    if (!email || !pw) { termPrint("Format : connexion_email_motdepasse", 'term-out-yellow'); return; }
+    if (!window.FB || !window.FB.ready) { termPrint("Connexion au serveur en cours, réessayez dans 2s...", 'term-out-yellow'); return; }
+    termPrint('Authentification auprès du serveur Black Wolves...', 'term-out-dim');
+    window.FB.signIn(email, pw)
+      .then(() => { /* onAuth s'occupe du reste */ })
+      .catch(err => {
+        termPrint("ACCÈS REFUSÉ — " + esc(fbError(err)), 'term-out-red');
+      });
     return;
   }
 
@@ -1409,7 +1523,7 @@ function termRunCommand(raw) {
     case 'aide':
       termPrint('Commandes disponibles :', 'term-out-yellow');
       termPrint('  <span class="term-out-cyan">help</span>            — affiche cette aide');
-      termPrint('  <span class="term-out-cyan">connexion_ID_MDP</span> — se connecter au panneau de commandement');
+      termPrint('  <span class="term-out-cyan">connexion_email_mdp</span> — se connecter (compte Firebase)');
       termPrint('  <span class="term-out-cyan">whoami</span>          — utilisateur actuel');
       termPrint('  <span class="term-out-cyan">status</span>          — état du système');
       termPrint('  <span class="term-out-cyan">dir</span> / ls        — liste les modules');
@@ -1422,7 +1536,7 @@ function termRunCommand(raw) {
       termPrint('Création de comptes : connectez-vous en admin, onglet "Comptes" du panneau.', 'term-out-dim');
       break;
     case 'whoami':
-      termPrint(currentUser ? currentUser.toUpperCase() + ' — accès commandement' : 'invité — non authentifié', 'term-out-cyan');
+      termPrint(currentUser ? (esc(currentUser) + ' — rôle : ' + esc(currentRole||'membre')) : 'invité — non authentifié', 'term-out-cyan');
       break;
     case 'status':
       termPrint('● Réseau tactique : <span class="term-out-green">ACTIF</span>');
@@ -1450,11 +1564,11 @@ function termRunCommand(raw) {
       break;
     case 'dashboard':
       if (currentUser) openDashboard();
-      else termPrint('Connexion requise. Utilisez : connexion_ID_MDP', 'term-out-red');
+      else termPrint('Connexion requise. Utilisez : connexion_email_motdepasse', 'term-out-red');
       break;
     case 'deconnexion':
     case 'logout':
-      if (currentUser) { termPrint('Déconnexion de ' + currentUser.toUpperCase() + '.', 'term-out-yellow'); currentUser = null; document.getElementById('term-prompt-label').textContent = 'C:\\BLACKWOLVES>'; }
+      if (currentUser && window.FB) { window.FB.signOut(); }
       else termPrint('Aucune session active.', 'term-out-dim');
       break;
     case 'clear':
@@ -1487,6 +1601,71 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ============================================================
+   ÉCRAN DE CONNEXION — compte à rebours 10s
+   ============================================================ */
+let lcTimer = null;
+function startLoginCountdown(seconds, done) {
+  const overlay = document.getElementById('login-countdown');
+  const numEl = document.getElementById('lc-num');
+  const progEl = document.getElementById('lc-prog');
+  const barEl = document.getElementById('lc-bar');
+  const msgEl = document.getElementById('lc-msg');
+  const userEl = document.getElementById('lc-user');
+  const skipEl = document.getElementById('lc-skip');
+
+  const messages = [
+    'Initialisation du panneau de commandement...',
+    'Chargement des effectifs depuis la Flotte Cosmos...',
+    'Synchronisation de l\'inventaire blindé...',
+    'Vérification des accréditations...',
+    'Établissement du canal chiffré...',
+    'Chargement des modules tactiques...',
+    'Décryptage des dossiers déclassifiés...',
+    'Connexion au réseau 104ème Wolfpack...',
+    'Calibrage de l\'interface de commandement...',
+    'Finalisation...'
+  ];
+
+  const R = 80, C = 2 * Math.PI * R;
+  progEl.style.strokeDasharray = C;
+  progEl.style.strokeDashoffset = 0;
+
+  userEl.textContent = shortUser(currentUser) + (currentRole ? '  ·  ' + currentRole.toUpperCase() : '');
+  overlay.classList.add('active');
+
+  let remaining = seconds;
+  const total = seconds;
+
+  function tick() {
+    numEl.textContent = remaining;
+    const ratio = remaining / total;
+    progEl.style.strokeDashoffset = C * (1 - ratio);
+    barEl.style.width = ((total - remaining) / total * 100) + '%';
+    const idx = Math.min(messages.length - 1, total - remaining);
+    msgEl.textContent = messages[idx];
+    if (remaining <= 0) { finish(); return; }
+    remaining--;
+  }
+
+  function finish() {
+    clearInterval(lcTimer); lcTimer = null;
+    barEl.style.width = '100%';
+    numEl.textContent = '0';
+    progEl.style.strokeDashoffset = C;
+    msgEl.textContent = 'Accès accordé.';
+    setTimeout(() => {
+      overlay.classList.remove('active');
+      if (typeof done === 'function') done();
+    }, 350);
+  }
+
+  skipEl.onclick = finish;
+
+  tick();                       // affichage immédiat à 10
+  lcTimer = setInterval(tick, 1000);
+}
+
+/* ============================================================
    DASHBOARD
    ============================================================ */
 function openDashboard() {
@@ -1499,12 +1678,8 @@ function openDashboard() {
   d.classList.add('active');
 }
 function dashLogout() {
-  document.getElementById('dashboard').classList.remove('active');
-  termPrint('Session ' + (currentUser?currentUser.toUpperCase():'') + ' fermée. Retour au terminal.', 'term-out-yellow');
-  currentUser = null;
-  currentRole = null;
-  document.getElementById('term-prompt-label').textContent = 'C:\\BLACKWOLVES>';
-  focusTerm();
+  if (window.FB) window.FB.signOut();
+  // onAuth (déconnexion) masque la catégorie et revient à l'accueil
 }
 function dashTab(name) {
   document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
@@ -1516,112 +1691,206 @@ function dashTab(name) {
 function renderDashLists() {
   // Effectifs
   const el = document.getElementById('dash-effectifs-list');
-  el.innerHTML = DATA.effectifs.map((m,i) => `<div class="dash-row">
+  el.innerHTML = DATA.effectifs.map(m => `<div class="dash-row">
     <div class="dash-row-info">
       <div class="dash-row-meta">${esc(m.rank)} · ${esc(m.badge)}</div>
       <div class="dash-row-title">${esc(m.name)}</div>
       <div class="dash-row-sub">${esc(m.id)} — ${esc(m.role)}</div>
     </div>
-    <button class="dash-del" onclick="delMember(${i})">✕ Retirer</button>
-  </div>`).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucun membre.</div>';
+    <button class="dash-del" onclick="delMember('${esc(m._id)}')">✕ Retirer</button>
+  </div>`).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucun membre. Utilisez l\'onglet Système pour importer les données par défaut.</div>';
 
   // Équipements
   const catLabel = {individuel:'INDIVIDUEL', vehicule:'VÉHICULE', canon:'CANON'};
   const eq = document.getElementById('dash-equip-list');
-  eq.innerHTML = DATA.equipements.map((e,i) => `<div class="dash-row">
+  eq.innerHTML = DATA.equipements.map(e => `<div class="dash-row">
     <div class="dash-row-info">
       <div class="dash-row-meta">${esc(catLabel[e.cat]||e.cat)} · ${esc(e.code)}${e.sf?' · 3D':''}</div>
       <div class="dash-row-title">${esc(e.icon||'')} ${esc(e.name)}</div>
       <div class="dash-row-sub">${esc(e.desc)}</div>
     </div>
-    <button class="dash-del" onclick="delEquip(${i})">✕ Retirer</button>
+    <button class="dash-del" onclick="delEquip('${esc(e._id)}')">✕ Retirer</button>
   </div>`).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucun équipement.</div>';
 
   // Comptes
   const ac = document.getElementById('dash-comptes-list');
   if (ac) {
-    ac.innerHTML = DATA.comptes.map((c,i) => `<div class="dash-row">
+    ac.innerHTML = DATA.comptes.map(c => `<div class="dash-row">
       <div class="dash-row-info">
         <div class="dash-row-meta">${esc((c.role||'membre').toUpperCase())}</div>
-        <div class="dash-row-title">${esc(c.id)}</div>
-        <div class="dash-row-sub">Mot de passe : ${'•'.repeat(Math.max(4,(c.pw||'').length))}</div>
+        <div class="dash-row-title">${esc(c.email||c._id)}</div>
+        <div class="dash-row-sub">Mot de passe : géré et chiffré par Firebase</div>
       </div>
-      <button class="dash-del" onclick="delAccount(${i})">✕ Supprimer</button>
-    </div>`).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucun compte créé. Les admins de secours restent définis dans le code.</div>';
+      <button class="dash-del" onclick="delAccount('${esc(c._id)}', '${esc(c.email||'')}')">✕ Retirer de la liste</button>
+    </div>`).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucun compte membre créé.</div>';
   }
 
-  // Stats
   document.getElementById('stat-members').textContent = DATA.effectifs.length;
   document.getElementById('stat-equip').textContent = DATA.equipements.length;
 }
 
+/* ===== CRUD COMPTES (Firebase Auth + Firestore) ===== */
 function addAccount() {
-  const id = document.getElementById('f-acc-id').value.trim().toLowerCase();
+  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
+  const email = document.getElementById('f-acc-id').value.trim().toLowerCase();
   const pw = document.getElementById('f-acc-pw').value;
   const role = document.getElementById('f-acc-role').value;
-  if (!id || !pw) { alert("Identifiant et mot de passe requis."); return; }
-  if (id.includes('_') || id.includes(' ')) { alert("L'identifiant ne doit pas contenir d'espace ni de tiret bas (_)."); return; }
-  if (DATA.comptes.some(c => c.id.toLowerCase() === id) || CREDENTIALS[id]) { alert("Cet identifiant existe déjà."); return; }
-  DATA.comptes.push({ id, pw, role });
-  saveData(DATA);
-  document.getElementById('f-acc-id').value = '';
-  document.getElementById('f-acc-pw').value = '';
-  renderDashLists();
+  if (!email || !pw) { alert("E-mail et mot de passe requis."); return; }
+  if (!email.includes('@')) { alert("L'identifiant doit être une adresse e-mail."); return; }
+  if (pw.length < 6) { alert("Le mot de passe doit faire au moins 6 caractères (règle Firebase)."); return; }
+  const btn = event && event.target; if (btn) btn.disabled = true;
+  window.FB.createUser(email, pw)
+    .then(uid => Promise.all([
+      window.FB.setRole(uid, role),
+      window.FB.addCompte(uid, { email, role })
+    ]))
+    .then(() => {
+      document.getElementById('f-acc-id').value = '';
+      document.getElementById('f-acc-pw').value = '';
+      alert("Compte créé : " + email + " (" + role + ").");
+    })
+    .catch(err => alert("Erreur : " + fbError(err)))
+    .finally(() => { if (btn) btn.disabled = false; });
 }
-function delAccount(i) {
-  if (!confirm('Supprimer le compte ' + DATA.comptes[i].id + ' ?')) return;
-  DATA.comptes.splice(i,1); saveData(DATA); renderDashLists();
+function delAccount(uid, email) {
+  if (currentRole !== 'admin') return;
+  if (!confirm("Retirer " + (email||uid) + " de la liste ?\n\n⚠ Cela retire le membre de la liste et de ses droits, mais le compte de connexion Firebase doit être supprimé manuellement dans la console Firebase (Authentication → Users).")) return;
+  Promise.all([ window.FB.delCompte(uid), window.FB.setRole(uid, 'revoked') ])
+    .catch(err => alert("Erreur : " + fbError(err)));
 }
 
+/* ===== CRUD EFFECTIFS ===== */
 function addMember() {
+  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
   const name = document.getElementById('f-mem-name').value.trim();
   if (!name) { alert('Le nom de code est requis.'); return; }
-  DATA.effectifs.push({
+  window.FB.addEffectif({
     rank: document.getElementById('f-mem-rank').value.trim() || '▲ Soldat',
     name: name.toUpperCase(),
     id: document.getElementById('f-mem-id').value.trim() || 'Membre',
     role: document.getElementById('f-mem-role').value.trim() || '—',
     badge: document.getElementById('f-mem-badge').value.trim() || 'ACTIF'
-  });
-  saveData(DATA);
-  ['f-mem-name','f-mem-rank','f-mem-id','f-mem-role'].forEach(id => document.getElementById(id).value='');
-  document.getElementById('f-mem-badge').value = 'ACTIF';
-  renderDashLists(); renderAll();
+  }).then(() => {
+    ['f-mem-name','f-mem-rank','f-mem-id','f-mem-role'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('f-mem-badge').value = 'ACTIF';
+  }).catch(err => alert("Erreur : " + fbError(err)));
 }
-function delMember(i) {
-  if (!confirm('Retirer ' + DATA.effectifs[i].name + ' de la meute ?')) return;
-  DATA.effectifs.splice(i,1); saveData(DATA); renderDashLists(); renderAll();
+function delMember(id) {
+  if (currentRole !== 'admin') return;
+  const m = DATA.effectifs.find(x => x._id === id);
+  if (!confirm('Retirer ' + (m?m.name:'') + ' de la meute ?')) return;
+  window.FB.delEffectif(id).catch(err => alert("Erreur : " + fbError(err)));
 }
 
+/* ===== CRUD ÉQUIPEMENTS ===== */
 function addEquip() {
+  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
   const code = document.getElementById('f-eq-code').value.trim();
   const name = document.getElementById('f-eq-name').value.trim();
   if (!code || !name) { alert('Le code et le nom sont requis.'); return; }
-  DATA.equipements.push({
+  window.FB.addEquip({
     cat: document.getElementById('f-eq-cat').value,
     code: code.toUpperCase(),
     name: name,
     desc: document.getElementById('f-eq-desc').value.trim() || '—',
     icon: document.getElementById('f-eq-icon').value.trim() || '📦',
     sf: document.getElementById('f-eq-sf').value.trim()
-  });
-  saveData(DATA);
-  ['f-eq-code','f-eq-name','f-eq-desc','f-eq-sf'].forEach(id => document.getElementById(id).value='');
-  document.getElementById('f-eq-icon').value = '📦';
-  renderDashLists(); renderAll();
+  }).then(() => {
+    ['f-eq-code','f-eq-name','f-eq-desc','f-eq-sf'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('f-eq-icon').value = '📦';
+  }).catch(err => alert("Erreur : " + fbError(err)));
 }
-function delEquip(i) {
-  if (!confirm('Retirer ' + DATA.equipements[i].name + ' de l\'inventaire ?')) return;
-  DATA.equipements.splice(i,1); saveData(DATA); renderDashLists(); renderAll();
+function delEquip(id) {
+  if (currentRole !== 'admin') return;
+  const e = DATA.equipements.find(x => x._id === id);
+  if (!confirm('Retirer ' + (e?e.name:'') + ' de l\'inventaire ?')) return;
+  window.FB.delEquip(id).catch(err => alert("Erreur : " + fbError(err)));
 }
 
+/* ===== IMPORT DES DONNÉES PAR DÉFAUT (1ère installation) ===== */
 function resetData() {
-  if (!confirm('Réinitialiser TOUTES les données aux valeurs d\'origine ? Action irréversible.')) return;
-  DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
-  saveData(DATA); renderDashLists(); renderAll();
+  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
+  if (DATA.effectifs.length || DATA.equipements.length) {
+    if (!confirm("Des données existent déjà. Importer AJOUTERA les entrées par défaut par-dessus (doublons possibles). Continuer ?")) return;
+  } else {
+    if (!confirm("Importer les effectifs et équipements par défaut dans la base partagée ?")) return;
+  }
+  const ops = [];
+  DEFAULT_DATA.effectifs.forEach(m => ops.push(window.FB.addEffectif(m)));
+  DEFAULT_DATA.equipements.forEach(e => ops.push(window.FB.addEquip(e)));
+  Promise.all(ops)
+    .then(() => alert("Données par défaut importées."))
+    .catch(err => alert("Erreur : " + fbError(err)));
 }
 
-// Rendu initial
+/* ===== HELPERS ===== */
+function shortUser(email) { return (email||'').split('@')[0].toUpperCase(); }
+function fbError(err) {
+  const c = (err && err.code) || '';
+  const map = {
+    'auth/invalid-credential': 'identifiants incorrects',
+    'auth/invalid-email': 'e-mail invalide',
+    'auth/user-not-found': 'compte introuvable',
+    'auth/wrong-password': 'mot de passe incorrect',
+    'auth/too-many-requests': 'trop de tentatives, réessayez plus tard',
+    'auth/email-already-in-use': 'cet e-mail a déjà un compte',
+    'auth/weak-password': 'mot de passe trop faible (min. 6 caractères)',
+    'auth/network-request-failed': 'erreur réseau',
+    'permission-denied': 'permission refusée (règles Firestore)'
+  };
+  return map[c] || (err && err.message) || 'erreur inconnue';
+}
+
+/* ============================================================
+   BRANCHEMENT FIREBASE (auth + temps réel)
+   ============================================================ */
+function startFirebase() {
+  // État de connexion
+  window.FB.onAuth(async (user) => {
+    if (user) {
+      currentUser = user.email;
+      currentUid = user.uid;
+      currentRole = await window.FB.getRole(user.uid);
+      if (currentRole === 'revoked') {
+        termPrint("Ce compte a été révoqué.", 'term-out-red');
+        window.FB.signOut();
+        return;
+      }
+      const labelEl = document.getElementById('term-prompt-label');
+      if (labelEl) labelEl.textContent = 'C:\\BLACKWOLVES\\' + shortUser(currentUser) + '>';
+      termPrint('Authentification réussie. Bienvenue, <span class="term-out-white">' + esc(shortUser(currentUser)) + '</span> [' + esc(currentRole) + '].', 'term-out-green');
+      termPrint('Établissement de la liaison sécurisée...', 'term-out-dim');
+      // À la fin du timer : la catégorie "Commandement" apparaît à gauche + on l'ouvre
+      startLoginCountdown(10, () => {
+        const navD = document.getElementById('nav-dashboard');
+        if (navD) navD.style.display = 'flex';
+        showDashboard();
+      });
+    } else {
+      currentUser = null; currentUid = null; currentRole = null;
+      const labelEl = document.getElementById('term-prompt-label');
+      if (labelEl) labelEl.textContent = 'C:\\BLACKWOLVES>';
+      // la catégorie "Commandement" disparaît
+      const navD = document.getElementById('nav-dashboard');
+      if (navD) { navD.style.display = 'none'; navD.classList.remove('active'); }
+      const dash = document.getElementById('dashboard');
+      const wasActive = dash && dash.classList.contains('active');
+      if (dash) dash.classList.remove('active');
+      // si on était sur le dashboard, on revient à l'accueil
+      if (wasActive) showPage('home');
+    }
+  });
+
+  // Synchronisation temps réel
+  window.FB.watchEffectifs(list => { DATA.effectifs = list; renderEffectifs(); if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
+  window.FB.watchEquip(list => { DATA.equipements = list; renderEquipements(); if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
+  window.FB.watchComptes(list => { DATA.comptes = list; if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
+}
+
+if (window.FB && window.FB.ready) startFirebase();
+else document.addEventListener('fb-ready', startFirebase);
+
+// Rendu initial (vide tant que Firestore n'a pas répondu)
 renderAll();
 
 // CLOCK
