@@ -1260,22 +1260,7 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   </div>
 </div>
 
-<!-- ====== ÉCRAN DE CONNEXION (compte à rebours 10s) ====== -->
-<div id="login-countdown">
-  <div class="lc-scanlines"></div>
-  <div class="lc-status">● ACCÈS AUTORISÉ — CONNEXION ÉTABLIE</div>
-  <div class="lc-user" id="lc-user">SOLDAT</div>
-  <div class="lc-ring">
-    <svg width="180" height="180" viewBox="0 0 180 180">
-      <circle class="lc-track" cx="90" cy="90" r="80"></circle>
-      <circle class="lc-prog" id="lc-prog" cx="90" cy="90" r="80"></circle>
-    </svg>
-    <div class="lc-num" id="lc-num">10</div>
-  </div>
-  <div class="lc-bar-track"><div class="lc-bar-fill" id="lc-bar"></div></div>
-  <div class="lc-msg" id="lc-msg">Initialisation du panneau de commandement...</div>
-  <button class="lc-skip" id="lc-skip">▸ Accéder maintenant</button>
-</div>
+<!-- ====== ÉCRAN DE CONNEXION (compte à rebours via terminal) ====== -->
 
 <script>
 // BOOT
@@ -1601,68 +1586,44 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ============================================================
-   ÉCRAN DE CONNEXION — compte à rebours 10s
+   COMPTE À REBOURS — dans le terminal (messages système)
    ============================================================ */
 let lcTimer = null;
-function startLoginCountdown(seconds, done) {
-  const overlay = document.getElementById('login-countdown');
-  const numEl = document.getElementById('lc-num');
-  const progEl = document.getElementById('lc-prog');
-  const barEl = document.getElementById('lc-bar');
-  const msgEl = document.getElementById('lc-msg');
-  const userEl = document.getElementById('lc-user');
-  const skipEl = document.getElementById('lc-skip');
-
-  const messages = [
-    'Initialisation du panneau de commandement...',
-    'Chargement des effectifs depuis la Flotte Cosmos...',
-    'Synchronisation de l\'inventaire blindé...',
-    'Vérification des accréditations...',
-    'Établissement du canal chiffré...',
-    'Chargement des modules tactiques...',
-    'Décryptage des dossiers déclassifiés...',
-    'Connexion au réseau 104ème Wolfpack...',
-    'Calibrage de l\'interface de commandement...',
-    'Finalisation...'
+function terminalCountdown(seconds, done) {
+  if (lcTimer) { clearInterval(lcTimer); lcTimer = null; }
+  const steps = [
+    'Établissement de la liaison sécurisée',
+    'Chargement des effectifs depuis la Flotte Cosmos',
+    'Synchronisation de l\'inventaire blindé',
+    'Vérification des accréditations',
+    'Établissement du canal chiffré',
+    'Décryptage des dossiers déclassifiés',
+    'Connexion au réseau 104ème Wolfpack',
+    'Calibrage de l\'interface de commandement',
+    'Activation des modules tactiques',
+    'Ouverture du panneau de commandement'
   ];
-
-  const R = 80, C = 2 * Math.PI * R;
-  progEl.style.strokeDasharray = C;
-  progEl.style.strokeDashoffset = 0;
-
-  userEl.textContent = shortUser(currentUser) + (currentRole ? '  ·  ' + currentRole.toUpperCase() : '');
-  overlay.classList.add('active');
-
-  let remaining = seconds;
   const total = seconds;
+  let remaining = seconds;
 
   function tick() {
-    numEl.textContent = remaining;
-    const ratio = remaining / total;
-    progEl.style.strokeDashoffset = C * (1 - ratio);
-    barEl.style.width = ((total - remaining) / total * 100) + '%';
-    const idx = Math.min(messages.length - 1, total - remaining);
-    msgEl.textContent = messages[idx];
-    if (remaining <= 0) { finish(); return; }
+    const idx = Math.min(steps.length - 1, total - remaining);
+    termPrint('&gt; ' + esc(steps[idx]) + '... <span class="term-out-yellow">[' + remaining + ']</span>', 'term-out-dim');
     remaining--;
   }
 
-  function finish() {
-    clearInterval(lcTimer); lcTimer = null;
-    barEl.style.width = '100%';
-    numEl.textContent = '0';
-    progEl.style.strokeDashoffset = C;
-    msgEl.textContent = 'Accès accordé.';
-    setTimeout(() => {
-      overlay.classList.remove('active');
+  tick();  // affiche immédiatement [10]
+  lcTimer = setInterval(() => {
+    if (remaining <= 0) {
+      clearInterval(lcTimer); lcTimer = null;
+      termPrint('&nbsp;');
+      termPrint('■ ACCÈS ACCORDÉ — PANNEAU DE COMMANDEMENT DÉBLOQUÉ', 'term-out-green');
+      termPrint('La catégorie « Commandement » a été ajoutée au menu.', 'term-out-dim');
       if (typeof done === 'function') done();
-    }, 350);
-  }
-
-  skipEl.onclick = finish;
-
-  tick();                       // affichage immédiat à 10
-  lcTimer = setInterval(tick, 1000);
+      return;
+    }
+    tick();
+  }, 1000);
 }
 
 /* ============================================================
@@ -1858,10 +1819,11 @@ function startFirebase() {
       }
       const labelEl = document.getElementById('term-prompt-label');
       if (labelEl) labelEl.textContent = 'C:\\BLACKWOLVES\\' + shortUser(currentUser) + '>';
+      // s'assure que le terminal est visible pour voir le décompte
+      showPage('terminal');
       termPrint('Authentification réussie. Bienvenue, <span class="term-out-white">' + esc(shortUser(currentUser)) + '</span> [' + esc(currentRole) + '].', 'term-out-green');
-      termPrint('Établissement de la liaison sécurisée...', 'term-out-dim');
-      // À la fin du timer : la catégorie "Commandement" apparaît à gauche + on l'ouvre
-      startLoginCountdown(10, () => {
+      // Décompte 10s en messages système, puis catégorie "Commandement"
+      terminalCountdown(10, () => {
         const navD = document.getElementById('nav-dashboard');
         if (navD) navD.style.display = 'flex';
         showDashboard();
