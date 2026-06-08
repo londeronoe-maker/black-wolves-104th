@@ -231,6 +231,14 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 }
 .sidebar-clock { font-size: 11px; color: rgba(255,255,255,0.2); letter-spacing: 1px; margin-bottom: 4px; }
 .sidebar-unit  { font-size: 8px; letter-spacing: 2px; color: rgba(192,57,43,0.45); }
+.sidebar-sound {
+  margin-top: 10px; font-size: 9px; letter-spacing: 2px;
+  color: rgba(255,255,255,0.4); cursor: pointer; user-select: none;
+  border: 1px solid rgba(255,255,255,0.1); padding: 6px 8px; text-align: center;
+  transition: all 0.18s;
+}
+.sidebar-sound:hover { color: #fff; border-color: rgba(192,57,43,0.4); }
+.sidebar-sound.off { color: rgba(255,255,255,0.25); }
 
 /* ========== MAIN ========== */
 #main { margin-left: 224px; flex: 1; min-height: 100vh; }
@@ -349,6 +357,27 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 }
 .member-photo.img-fail img { display: none; }
 .member-photo.img-fail .photo-fallback { display: block; }
+/* médailles */
+.member-medals { display: flex; flex-wrap: wrap; gap: 5px; padding-top: 8px; border-top: 1px solid var(--border); }
+.medal {
+  font-size: 10px; letter-spacing: 0.5px; padding: 3px 7px;
+  border: 1px solid var(--amber-border); background: var(--amber-dim);
+  color: var(--amber); white-space: nowrap;
+}
+/* organigramme par grade */
+.org-tier { margin-bottom: 30px; }
+.org-tier-head {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
+  letter-spacing: 3px; color: var(--text); text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.org-tier-bar { display: inline-block; width: 18px; height: 2px; background: var(--red); }
+.org-tier-count {
+  font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 1px;
+  color: var(--red); border: 1px solid var(--red-border); background: var(--red-dim);
+  padding: 1px 7px; margin-left: 2px;
+}
 .member-name { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; color: var(--text); }
 .member-id   { font-size: 11px; color: var(--text-muted); }
 .member-role { font-size: 11px; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 8px; line-height: 1.6; }
@@ -813,6 +842,22 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 .home-stat .val { font-family: 'Orbitron', sans-serif; font-size: 19px; font-weight: 700; color: #fff; margin-bottom: 4px; }
 .home-stat .lbl { font-size: 8px; letter-spacing: 3px; color: rgba(255,255,255,0.25); }
 .home-nav-hint { position: absolute; bottom: 36px; font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.15); animation: pulse 2.5s infinite; }
+.home-board {
+  position: relative; margin-top: 38px; width: 100%; max-width: 620px;
+  border: 1px solid rgba(192,57,43,0.3); background: rgba(0,0,0,0.4);
+  text-align: left; animation: fadeSlide 0.6s 0.5s ease both;
+}
+.board-head {
+  font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 2px;
+  color: var(--red); text-transform: uppercase; padding: 12px 16px;
+  border-bottom: 1px solid rgba(192,57,43,0.25); display: flex; align-items: center; gap: 9px;
+}
+.board-led { width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); animation: blink 1.5s infinite; }
+.board-item { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.board-item:last-child { border-bottom: none; }
+.board-item-date { font-size: 9px; letter-spacing: 2px; color: var(--amber); margin-bottom: 5px; text-transform: uppercase; }
+.board-item-title { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 1px; margin-bottom: 6px; }
+.board-item-body { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.6; }
 
 @keyframes pulse    { 50% { opacity: 0.05; } }
 @keyframes fadeSlide { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform: translateY(0); } }
@@ -897,6 +942,10 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
     watchComptes: (cb) => onSnapshot(collection(db, 'comptes'), s => cb(s.docs.map(d => ({ _id:d.id, ...d.data() })))),
     addCompte: (uid, c) => setDoc(doc(db, 'comptes', uid), c),
     delCompte: (uid) => deleteDoc(doc(db, 'comptes', uid)),
+    // Annonces (mur d'accueil)
+    watchAnnonces: (cb) => onSnapshot(collection(db, 'annonces'), s => cb(s.docs.map(d => ({ _id:d.id, ...d.data() })))),
+    addAnnonce: (a) => addDoc(collection(db, 'annonces'), a),
+    delAnnonce: (id) => deleteDoc(doc(db, 'annonces', id)),
     ready: true
   };
   document.dispatchEvent(new Event('fb-ready'));
@@ -973,6 +1022,7 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   <div class="sidebar-bottom">
     <div class="sidebar-clock" id="clock">--:--:--</div>
     <div class="sidebar-unit">104th // BW UNIT</div>
+    <div class="sidebar-sound" id="sound-toggle" onclick="toggleSound()">🔊 SON : ACTIVÉ</div>
   </div>
 </div>
 
@@ -994,6 +1044,10 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
       <div class="home-stat"><div class="val">ACTIF</div><div class="lbl">Statut</div></div>
       <div class="home-stat"><div class="val">BLINDÉ</div><div class="lbl">Spécialité</div></div>
       <div class="home-stat"><div class="val">5</div><div class="lbl">Fondateurs</div></div>
+    </div>
+    <div class="home-board" id="home-board" style="display:none;">
+      <div class="board-head"><span class="board-led"></span> ORDRES DU JOUR — TRANSMISSION DE COMMANDEMENT</div>
+      <div id="board-list"></div>
     </div>
     <div class="home-nav-hint">← NAVIGUEZ VIA LE MENU</div>
   </div>
@@ -1261,6 +1315,7 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   <div class="dash-tabs">
     <div class="dash-tab active" onclick="dashTab('effectifs')" id="dtab-effectifs">Effectifs</div>
     <div class="dash-tab" onclick="dashTab('equipements')" id="dtab-equipements">Équipements</div>
+    <div class="dash-tab" onclick="dashTab('annonces')" id="dtab-annonces">Annonces</div>
     <div class="dash-tab" onclick="dashTab('comptes')" id="dtab-comptes" style="display:none;">Comptes</div>
     <div class="dash-tab" onclick="dashTab('systeme')" id="dtab-systeme">Système</div>
   </div>
@@ -1276,9 +1331,23 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
           <div class="dash-field"><label>Nom de code</label><input id="f-mem-name" placeholder="ex: SHADOW"></div>
           <div class="dash-field"><label>Grade / Rang</label><input id="f-mem-rank" placeholder="ex: ▲ Soldat"></div>
         </div>
+        <div class="dash-form-grid">
+          <div class="dash-field"><label>Niveau hiérarchique</label>
+            <select id="f-mem-tier">
+              <option value="100">Commandant</option>
+              <option value="90">Capitaine</option>
+              <option value="80">Lieutenant</option>
+              <option value="70">Sergent</option>
+              <option value="60">Caporal</option>
+              <option value="50" selected>Soldat</option>
+              <option value="30">Recrue</option>
+            </select>
+          </div>
+          <div class="dash-field"><label>Badge</label><input id="f-mem-badge" placeholder="ex: ACTIF, FONDATEUR..." value="ACTIF"></div>
+        </div>
         <div class="dash-field"><label>Spécialité / Poste</label><input id="f-mem-id" placeholder="ex: Pilote de Combat"></div>
         <div class="dash-field"><label>Rôle / Description</label><textarea id="f-mem-role" placeholder="Description du rôle dans la compagnie"></textarea></div>
-        <div class="dash-field"><label>Badge</label><input id="f-mem-badge" placeholder="ex: ACTIF, FONDATEUR..." value="ACTIF"></div>
+        <div class="dash-field"><label>Médailles / Décorations (séparées par une virgule)</label><input id="f-mem-medals" placeholder="ex: 🎖️ Héros de Felucia, 🏅 Bravoure, ⭐ Vétéran"></div>
         <div class="dash-field"><label>Image (URL, optionnel)</label><input id="f-mem-img" placeholder="https://... (lien vers une photo)"></div>
         <button class="dash-add-btn" onclick="addMember()">▸ Ajouter à la meute</button>
       </div>
@@ -1309,6 +1378,18 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
         </div>
         <div style="font-size:10px; color:var(--text-muted); margin:-4px 0 12px; line-height:1.5;">Priorité d'affichage : image &gt; modèle 3D &gt; icône.</div>
         <button class="dash-add-btn" onclick="addEquip()">▸ Ajouter à l'inventaire</button>
+      </div>
+    </div>
+
+    <!-- ANNONCES PANEL -->
+    <div class="dash-panel" id="dpanel-annonces">
+      <div class="dash-section-title">Mur d'Annonces — Ordres du Jour</div>
+      <div id="dash-annonces-list"></div>
+      <div class="dash-form">
+        <div class="dash-form-title">+ Publier une annonce</div>
+        <div class="dash-field"><label>Titre</label><input id="f-an-title" placeholder="ex: Opération sur Felucia ce week-end"></div>
+        <div class="dash-field"><label>Message</label><textarea id="f-an-body" placeholder="Détails de l'annonce..."></textarea></div>
+        <button class="dash-add-btn" onclick="addAnnonce()">▸ Publier sur l'accueil</button>
       </div>
     </div>
 
@@ -1422,7 +1503,44 @@ function startBoot() {
 }
 
 // NAV
+/* ============================================================
+   SONS — bips comlink (générés via WebAudio, sans fichiers)
+   ============================================================ */
+let soundOn = true;
+let audioCtx = null;
+function getCtx() {
+  if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){} }
+  return audioCtx;
+}
+function blip(freq, dur, type, vol) {
+  if (!soundOn) return;
+  const ctx = getCtx(); if (!ctx) return;
+  try {
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type || 'square';
+    o.frequency.value = freq || 660;
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(vol || 0.06, ctx.currentTime + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (dur || 0.08));
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime + (dur || 0.08));
+  } catch(e) {}
+}
+function soundNav()    { blip(720, 0.06, 'square', 0.05); }
+function soundOpen()   { blip(520, 0.05, 'square', 0.05); setTimeout(()=>blip(880,0.07,'square',0.05), 70); }
+function soundConfirm(){ blip(440, 0.05, 'square', 0.05); setTimeout(()=>blip(660,0.05,'square',0.05),60); setTimeout(()=>blip(990,0.08,'square',0.05),120); }
+function soundError()  { blip(200, 0.18, 'sawtooth', 0.05); }
+
+function toggleSound() {
+  soundOn = !soundOn;
+  const el = document.getElementById('sound-toggle');
+  if (el) { el.textContent = soundOn ? '🔊 SON : ACTIVÉ' : '🔇 SON : COUPÉ'; el.classList.toggle('off', !soundOn); }
+  if (soundOn) soundNav();
+}
+
 function showPage(id) {
+  soundNav();
   // quitte la vue dashboard si on navigue vers une page normale
   const dash = document.getElementById('dashboard');
   if (dash) dash.classList.remove('active');
@@ -1460,11 +1578,11 @@ function loadModel(iframeId) {
 // Données par défaut — utilisées UNIQUEMENT pour le bouton "Importer" (1ère installation)
 const DEFAULT_DATA = {
   effectifs: [
-    { rank:'▲ Fondateur', name:'WILDFIRE', id:'Commandant — Black Wolves', role:'Leadership & Commandement opérationnel de la compagnie', badge:'FONDATEUR' },
-    { rank:'▲ Fondateur', name:'FENRIR', id:'Spécialiste Démolition', role:'Explosifs, Charges, Neutralisation de fortifications', badge:'FONDATEUR' },
-    { rank:'▲ Fondateur', name:'SPITTER', id:'Pilote de Combat', role:'AT-TE, TX-225, Manœuvres blindées en terrain hostile', badge:'FONDATEUR' },
-    { rank:'▲ Fondateur', name:'BOLT', id:'Stratège Tactique', role:"Planification d'opérations, Analyse de terrain", badge:'FONDATEUR' },
-    { rank:'▲ Fondateur', name:'MOUSE', id:'Technicien / Pirate Informatique', role:'Systèmes CIS, Réparations de terrain, Ingénierie', badge:'FONDATEUR' }
+    { rank:'▲ Fondateur', name:'WILDFIRE', id:'Commandant — Black Wolves', role:'Leadership & Commandement opérationnel de la compagnie', badge:'FONDATEUR', tier:100, tierLabel:'Commandant', medals:['🎖️ Héros de Felucia','⭐ Fondateur'] },
+    { rank:'▲ Fondateur', name:'FENRIR', id:'Spécialiste Démolition', role:'Explosifs, Charges, Neutralisation de fortifications', badge:'FONDATEUR', tier:50, tierLabel:'Soldat', medals:['🎖️ Héros de Felucia','💥 Maître Démolisseur'] },
+    { rank:'▲ Fondateur', name:'SPITTER', id:'Pilote de Combat', role:'AT-TE, TX-225, Manœuvres blindées en terrain hostile', badge:'FONDATEUR', tier:50, tierLabel:'Soldat', medals:['🎖️ Héros de Felucia','🦿 As du Pilotage'] },
+    { rank:'▲ Fondateur', name:'BOLT', id:'Stratège Tactique', role:"Planification d'opérations, Analyse de terrain", badge:'FONDATEUR', tier:50, tierLabel:'Soldat', medals:['🎖️ Héros de Felucia','🧠 Esprit Tactique'] },
+    { rank:'▲ Fondateur', name:'MOUSE', id:'Technicien / Pirate Informatique', role:'Systèmes CIS, Réparations de terrain, Ingénierie', badge:'FONDATEUR', tier:50, tierLabel:'Soldat', medals:['🎖️ Héros de Felucia','💻 Génie Technique'] }
   ],
   equipements: [
     { cat:'individuel', code:'DC-15A', name:'DC-15A Blaster Rifle', desc:'Fusil blaster standard des soldats clones. Précision longue portée, fiable dans tous les environnements de combat.', icon:'🔫', sf:'133cbdfdf0ae41078a7c5f1f93b7a7a4' },
@@ -1479,35 +1597,64 @@ const DEFAULT_DATA = {
 };
 
 // Miroir en mémoire, alimenté en temps réel par Firestore
-let DATA = { effectifs: [], equipements: [], comptes: [] };
+let DATA = { effectifs: [], equipements: [], comptes: [], annonces: [] };
 
 // échappement HTML
 function esc(s) {
   return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-/* ===== RENDU PAGE EFFECTIFS ===== */
+/* ===== RENDU PAGE EFFECTIFS (organigramme par grade) ===== */
+function memberCardHTML(m) {
+  const photo = m.img
+    ? `<div class="member-photo"><img src="${esc(m.img)}" alt="${esc(m.name)}" loading="lazy" onerror="this.parentElement.classList.add('img-fail')"><span class="photo-fallback">${esc(m.name)}</span></div>`
+    : '';
+  const medals = (Array.isArray(m.medals) && m.medals.length)
+    ? `<div class="member-medals">${m.medals.map(md => `<span class="medal" title="${esc(md)}">${esc(md)}</span>`).join('')}</div>`
+    : '';
+  return `<div class="member-card${m.img?' has-photo':''}">
+    ${photo}
+    <div class="member-rank">${esc(m.rank)}</div>
+    <div class="member-name">${esc(m.name)}</div>
+    <div class="member-id">${esc(m.id)}</div>
+    <div class="member-role">${esc(m.role)}</div>
+    ${medals}
+    <span class="badge badge-red">${esc(m.badge)}</span>
+  </div>`;
+}
+
 function renderEffectifs() {
   const grid = document.getElementById('effectifs-grid');
   if (!grid) return;
+
+  // tri par niveau hiérarchique décroissant, puis par nom
+  const sorted = [...DATA.effectifs].sort((a,b) =>
+    (b.tier||50) - (a.tier||50) || String(a.name).localeCompare(String(b.name))
+  );
+
+  // groupement par niveau (organigramme)
+  const groups = [];
+  let cur = null;
+  sorted.forEach(m => {
+    const label = m.tierLabel || 'Soldat';
+    if (!cur || cur.label !== label) { cur = { label, tier: (m.tier||50), members: [] }; groups.push(cur); }
+    cur.members.push(m);
+  });
+
   let html = '';
-  DATA.effectifs.forEach(m => {
-    const photo = m.img
-      ? `<div class="member-photo"><img src="${esc(m.img)}" alt="${esc(m.name)}" loading="lazy" onerror="this.parentElement.classList.add('img-fail')"><span class="photo-fallback">${esc(m.name)}</span></div>`
-      : '';
-    html += `<div class="member-card${m.img?' has-photo':''}">
-      ${photo}
-      <div class="member-rank">${esc(m.rank)}</div>
-      <div class="member-name">${esc(m.name)}</div>
-      <div class="member-id">${esc(m.id)}</div>
-      <div class="member-role">${esc(m.role)}</div>
-      <span class="badge badge-red">${esc(m.badge)}</span>
+  groups.forEach(g => {
+    html += `<div class="org-tier">
+      <div class="org-tier-head"><span class="org-tier-bar"></span>${esc(g.label.toUpperCase())} <span class="org-tier-count">${g.members.length}</span></div>
+      <div class="grid-3">${g.members.map(memberCardHTML).join('')}</div>
     </div>`;
   });
-  html += `<div class="member-card" style="border-style:dashed; border-top-style:dashed; opacity:0.35; align-items:center; justify-content:center; min-height:160px; text-align:center; gap:6px;">
+
+  // slot disponible
+  html += `<div class="org-tier"><div class="grid-3"><div class="member-card" style="border-style:dashed; border-top-style:dashed; opacity:0.35; align-items:center; justify-content:center; min-height:160px; text-align:center; gap:6px;">
     <div style="font-size:10px; letter-spacing:3px; color:var(--text-muted);">SLOT DISPONIBLE</div>
     <div style="font-size:11px; color:var(--text-muted);">Rejoignez la meute</div>
-  </div>`;
+  </div></div></div>`;
+
   grid.innerHTML = html;
   const cnt = document.getElementById('effectifs-count');
   if (cnt) cnt.textContent = DATA.effectifs.length + ' MEMBRE' + (DATA.effectifs.length>1?'S':'') + ' ACTIF' + (DATA.effectifs.length>1?'S':'');
@@ -1559,7 +1706,25 @@ function renderEquipements() {
   });
 }
 
-function renderAll() { renderEffectifs(); renderEquipements(); }
+/* ===== RENDU ANNONCES (accueil) ===== */
+function renderAnnonces() {
+  const board = document.getElementById('home-board');
+  const list = document.getElementById('board-list');
+  if (!board || !list) return;
+  const items = [...DATA.annonces].sort((a,b) => (b.ts||0) - (a.ts||0));
+  if (!items.length) { board.style.display = 'none'; return; }
+  board.style.display = 'block';
+  list.innerHTML = items.map(a => {
+    const d = a.ts ? new Date(a.ts).toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}) : '';
+    return `<div class="board-item">
+      <div class="board-item-date">▸ ${esc(d)}</div>
+      <div class="board-item-title">${esc(a.title)}</div>
+      <div class="board-item-body">${esc(a.body)}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderAll() { renderEffectifs(); renderEquipements(); renderAnnonces(); }
 
 /* ============================================================
    TERMINAL
@@ -1603,8 +1768,22 @@ function termRunCommand(raw) {
     window.FB.signIn(email, pw)
       .then(() => { /* onAuth s'occupe du reste */ })
       .catch(err => {
+        soundError();
         termPrint("ACCÈS REFUSÉ — " + esc(fbError(err)), 'term-out-red');
       });
+    return;
+  }
+
+  // jet de dé : roll  ou  roll 20
+  if (lower === 'roll' || lower.startsWith('roll ') || lower.startsWith('roll_')) {
+    const parts = cmd.split(/[ _]/);
+    let faces = parseInt(parts[1], 10);
+    if (!faces || faces < 2) faces = 6;
+    if (faces > 1000) faces = 1000;
+    const res = Math.floor(Math.random() * faces) + 1;
+    soundConfirm();
+    const crit = (res === faces) ? ' <span class="term-out-green">— RÉUSSITE CRITIQUE !</span>' : (res === 1 ? ' <span class="term-out-red">— ÉCHEC CRITIQUE !</span>' : '');
+    termPrint('🎲 Jet de dé [D' + faces + '] : <span class="term-out-white">' + res + '</span>' + crit, 'term-out-yellow');
     return;
   }
 
@@ -1622,6 +1801,12 @@ function termRunCommand(raw) {
       termPrint('  <span class="term-out-cyan">dashboard</span>       — ouvrir le panneau (si connecté)');
       termPrint('  <span class="term-out-cyan">deconnexion</span>     — se déconnecter');
       termPrint('  <span class="term-out-cyan">clear</span> / cls     — efface l\'écran');
+      termPrint('&nbsp;');
+      termPrint('Commandes spéciales :', 'term-out-yellow');
+      termPrint('  <span class="term-out-cyan">lore</span>            — l\'histoire de la meute');
+      termPrint('  <span class="term-out-cyan">roll [faces]</span>    — jet de dé (ex: roll 20)');
+      termPrint('  <span class="term-out-cyan">effectifs</span>       — liste rapide des membres');
+      termPrint('  <span class="term-out-cyan">awoo</span>            — ...');
       termPrint('&nbsp;');
       termPrint('Création de comptes : connectez-vous en admin, onglet "Comptes" du panneau.', 'term-out-dim');
       break;
@@ -1665,11 +1850,36 @@ function termRunCommand(raw) {
     case 'cls':
       document.getElementById('term-history').innerHTML = '';
       break;
+    case 'lore':
+    case 'histoire':
+      termPrint('=== ARCHIVES BLACK WOLVES — FELUCIA ===', 'term-out-yellow');
+      termPrint('Lors de la Seconde Bataille de Felucia, l\'aile droite du 104ème', 'term-out-dim');
+      termPrint('tomba dans une embuscade de la CSI. Seuls cinq clones survécurent :', 'term-out-dim');
+      termPrint('WILDFIRE, FENRIR, SPITTER, BOLT et MOUSE.', 'term-out-cyan');
+      termPrint('Piégés derrière les lignes ennemies, ils détruisirent un bataillon', 'term-out-dim');
+      termPrint('droïde entier à eux seuls. À leur retour, ils furent décorés et', 'term-out-dim');
+      termPrint('fondèrent leur propre compagnie : <span class="term-out-white">LES BLACK WOLVES</span>.', 'term-out-dim');
+      termPrint('« L\'AT-TE rugit, l\'ennemi faiblit ! »', 'term-out-yellow');
+      break;
+    case 'effectifs':
+    case 'roster':
+      if (!DATA.effectifs.length) { termPrint('Base de données vide.', 'term-out-dim'); break; }
+      termPrint('=== EFFECTIFS ACTIFS (' + DATA.effectifs.length + ') ===', 'term-out-yellow');
+      [...DATA.effectifs].sort((a,b)=>(b.tier||50)-(a.tier||50)).forEach(m => {
+        termPrint('  <span class="term-out-cyan">' + esc(m.name) + '</span> — ' + esc(m.tierLabel||'Soldat') + ' · ' + esc(m.id), 'term-out-dim');
+      });
+      break;
     case 'wolf':
     case 'awoo':
-      termPrint('🐺 AWOOOO ! La meute veille.', 'term-out-yellow');
+      blip(300,0.12,'sawtooth',0.06); setTimeout(()=>blip(500,0.18,'sawtooth',0.06),120); setTimeout(()=>blip(380,0.25,'sawtooth',0.06),320);
+      termPrint('🐺 A W O O O O O O ! ', 'term-out-yellow');
+      termPrint('La meute répond à l\'appel. Restez soudés, soldats.', 'term-out-dim');
+      break;
+    case 'sudo':
+      termPrint('Belle tentative, soldat. Mais le commandement ne s\'obtient pas avec sudo. 😏', 'term-out-yellow');
       break;
     default:
+      soundError();
       termPrint("'" + esc(cmd) + "' n'est pas reconnu en tant que commande interne. Tapez 'help'.", 'term-out-red');
   }
 }
@@ -1735,6 +1945,7 @@ function terminalCountdown(seconds, done) {
    DASHBOARD
    ============================================================ */
 function openDashboard() {
+  soundOpen();
   const d = document.getElementById('dashboard');
   document.getElementById('dash-user-label').textContent = 'CONNECTÉ : ' + (currentUser ? currentUser.toUpperCase() : '') + (currentRole ? ' · ' + currentRole.toUpperCase() : '');
   // onglet Comptes réservé aux admins
@@ -1760,7 +1971,7 @@ function renderDashLists() {
   el.innerHTML = DATA.effectifs.map(m => `<div class="dash-row">
     ${m.img ? `<img class="dash-thumb" src="${esc(m.img)}" alt="" onerror="this.style.display='none'">` : ''}
     <div class="dash-row-info">
-      <div class="dash-row-meta">${esc(m.rank)} · ${esc(m.badge)}</div>
+      <div class="dash-row-meta">${esc(m.tierLabel||'Soldat')} · ${esc(m.rank)} · ${esc(m.badge)}${(Array.isArray(m.medals)&&m.medals.length)?' · '+m.medals.length+' méd.':''}</div>
       <div class="dash-row-title">${esc(m.name)}</div>
       <div class="dash-row-sub">${esc(m.id)} — ${esc(m.role)}</div>
     </div>
@@ -1793,8 +2004,41 @@ function renderDashLists() {
     </div>`).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucun compte membre créé.</div>';
   }
 
+  // Annonces
+  const an = document.getElementById('dash-annonces-list');
+  if (an) {
+    const items = [...DATA.annonces].sort((a,b) => (b.ts||0) - (a.ts||0));
+    an.innerHTML = items.map(a => {
+      const d = a.ts ? new Date(a.ts).toLocaleDateString('fr-FR') : '';
+      return `<div class="dash-row">
+        <div class="dash-row-info">
+          <div class="dash-row-meta">${esc(d)}</div>
+          <div class="dash-row-title">${esc(a.title)}</div>
+          <div class="dash-row-sub">${esc(a.body)}</div>
+        </div>
+        <button class="dash-del" onclick="delAnnonce('${esc(a._id)}')">✕ Retirer</button>
+      </div>`;
+    }).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucune annonce publiée.</div>';
+  }
+
   document.getElementById('stat-members').textContent = DATA.effectifs.length;
   document.getElementById('stat-equip').textContent = DATA.equipements.length;
+}
+
+/* ===== CRUD ANNONCES ===== */
+function addAnnonce() {
+  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
+  const title = document.getElementById('f-an-title').value.trim();
+  const body = document.getElementById('f-an-body').value.trim();
+  if (!title || !body) { alert("Titre et message requis."); return; }
+  window.FB.addAnnonce({ title, body, ts: Date.now() })
+    .then(() => { document.getElementById('f-an-title').value=''; document.getElementById('f-an-body').value=''; })
+    .catch(err => alert("Erreur : " + fbError(err)));
+}
+function delAnnonce(id) {
+  if (currentRole !== 'admin') return;
+  if (!confirm("Retirer cette annonce ?")) return;
+  window.FB.delAnnonce(id).catch(err => alert("Erreur : " + fbError(err)));
 }
 
 /* ===== CRUD COMPTES (Firebase Auth + Firestore) ===== */
@@ -1832,16 +2076,21 @@ function addMember() {
   if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
   const name = document.getElementById('f-mem-name').value.trim();
   if (!name) { alert('Le nom de code est requis.'); return; }
+  const tierSel = document.getElementById('f-mem-tier');
   window.FB.addEffectif({
     rank: document.getElementById('f-mem-rank').value.trim() || '▲ Soldat',
     name: name.toUpperCase(),
     id: document.getElementById('f-mem-id').value.trim() || 'Membre',
     role: document.getElementById('f-mem-role').value.trim() || '—',
     badge: document.getElementById('f-mem-badge').value.trim() || 'ACTIF',
+    tier: parseInt(tierSel.value, 10) || 50,
+    tierLabel: tierSel.options[tierSel.selectedIndex].text,
+    medals: document.getElementById('f-mem-medals').value.split(',').map(s => s.trim()).filter(Boolean),
     img: document.getElementById('f-mem-img').value.trim()
   }).then(() => {
-    ['f-mem-name','f-mem-rank','f-mem-id','f-mem-role','f-mem-img'].forEach(id => document.getElementById(id).value='');
+    ['f-mem-name','f-mem-rank','f-mem-id','f-mem-role','f-mem-medals','f-mem-img'].forEach(id => document.getElementById(id).value='');
     document.getElementById('f-mem-badge').value = 'ACTIF';
+    document.getElementById('f-mem-tier').value = '50';
   }).catch(err => alert("Erreur : " + fbError(err)));
 }
 function delMember(id) {
@@ -1931,6 +2180,7 @@ function startFirebase() {
       // s'assure que le terminal est visible pour voir le décompte
       showPage('terminal');
       termPrint('Authentification réussie. Bienvenue, <span class="term-out-white">' + esc(shortUser(currentUser)) + '</span> [' + esc(currentRole) + '].', 'term-out-green');
+      soundConfirm();
       // Décompte 10s en messages système, puis catégorie "Commandement"
       terminalCountdown(10, () => {
         const navD = document.getElementById('nav-dashboard');
@@ -1956,6 +2206,7 @@ function startFirebase() {
   window.FB.watchEffectifs(list => { DATA.effectifs = list; renderEffectifs(); if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
   window.FB.watchEquip(list => { DATA.equipements = list; renderEquipements(); if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
   window.FB.watchComptes(list => { DATA.comptes = list; if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
+  window.FB.watchAnnonces(list => { DATA.annonces = list; renderAnnonces(); if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
 }
 
 if (window.FB && window.FB.ready) startFirebase();
