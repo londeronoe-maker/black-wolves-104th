@@ -7,26 +7,28 @@
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
 <style>
 :root {
-  --sidebar-bg:   #0d0d0d;
-  --red:          #c0392b;
-  --red-bright:   #e74c3c;
-  --red-dim:      rgba(192,57,43,0.12);
-  --red-border:   rgba(192,57,43,0.3);
-  --amber:        #d4820a;
-  --amber-dim:    rgba(212,130,10,0.1);
-  --amber-border: rgba(212,130,10,0.3);
-  --green-ok:     #27ae60;
-  --bg:           #181818;
-  --bg2:          #212121;
-  --bg3:          #272727;
-  --panel:        #1e1e1e;
-  --panel2:       #252525;
+  --sidebar-bg:   #0e1217;
+  /* accent principal : bleu-gris acier (ex-rouge) */
+  --red:          #5f86a3;
+  --red-bright:   #84acca;
+  --red-dim:      rgba(95,134,163,0.14);
+  --red-border:   rgba(95,134,163,0.34);
+  /* highlight secondaire : or froid (dates, médailles, alertes) */
+  --amber:        #c2a24e;
+  --amber-dim:    rgba(194,162,78,0.1);
+  --amber-border: rgba(194,162,78,0.3);
+  --green-ok:     #5aa17a;
+  --bg:           #161a1f;
+  --bg2:          #1c2128;
+  --bg3:          #232932;
+  --panel:        #1a1f25;
+  --panel2:       #222831;
   --border:       rgba(255,255,255,0.07);
   --border-mid:   rgba(255,255,255,0.14);
   --border-dark:  rgba(255,255,255,0.25);
-  --text:         #e8e8e4;
-  --text-dim:     #a0a09a;
-  --text-muted:   #606058;
+  --text:         #e6e9ee;
+  --text-dim:     #9aa1ac;
+  --text-muted:   #5c636e;
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -62,7 +64,7 @@ body {
   font-family: 'Orbitron', sans-serif;
   font-size: clamp(30px, 7vw, 64px); font-weight: 900;
   letter-spacing: 8px; color: var(--red);
-  text-shadow: 0 0 30px rgba(192,57,43,0.4);
+  text-shadow: 0 0 30px rgba(95,134,163,0.4);
   position: relative; margin-bottom: 10px;
 }
 .gate-sub {
@@ -82,44 +84,57 @@ body {
   padding: 16px 44px; cursor: pointer; position: relative;
   color: #fff; background: var(--red);
   border: 1px solid var(--red); text-transform: uppercase;
-  transition: all 0.2s; box-shadow: 0 0 24px rgba(192,57,43,0.3);
+  transition: all 0.2s; box-shadow: 0 0 24px rgba(95,134,163,0.3);
 }
-#enter-btn:hover { background: var(--red-bright); border-color: var(--red-bright); box-shadow: 0 0 36px rgba(192,57,43,0.5); }
+#enter-btn:hover { background: var(--red-bright); border-color: var(--red-bright); box-shadow: 0 0 36px rgba(95,134,163,0.5); }
 .gate-hint {
   font-family: 'Share Tech Mono', monospace; font-size: 11px;
   letter-spacing: 2px; color: var(--text-muted);
   margin-top: 20px; position: relative;
 }
 
-/* ========== BOOT SCREEN ========== */
+/* ========== BOOT SCREEN (cadre terminal) ========== */
 #boot {
   position: fixed; inset: 0;
-  background: #080808;
+  background: #060809;
   z-index: 9999;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 28px;
 }
 
+#boot-window {
+  width: 100%;
+  max-width: 720px;
+  background: #000;
+  border: 1px solid var(--border-mid);
+  box-shadow: 0 0 40px rgba(0,0,0,0.6), 0 0 60px rgba(95,134,163,0.08);
+  display: flex;
+  flex-direction: column;
+  max-height: 86vh;
+}
+#boot-window .term-titlebar { flex-shrink: 0; }
+
 #boot-inner {
-  max-width: 680px;
   width: 100%;
   font-family: 'VT323', monospace;
   font-size: 17px;
-  color: #cc2222;
+  color: #5f86a3;
+  padding: 20px 22px 24px;
+  overflow-y: auto;
 }
 
 .boot-logo {
   font-family: 'Orbitron', sans-serif;
-  font-size: clamp(22px, 5vw, 48px);
+  font-size: clamp(22px, 5vw, 44px);
   font-weight: 900;
   letter-spacing: 6px;
   color: var(--red);
   text-align: center;
-  margin-bottom: 28px;
-  text-shadow: 0 0 30px rgba(192,57,43,0.4);
+  margin-bottom: 22px;
+  text-shadow: 0 0 30px rgba(95,134,163,0.4);
 }
 
 .boot-line {
@@ -131,7 +146,7 @@ body {
 .boot-line.show { opacity: 1; transform: none; }
 .boot-line .ok   { color: #27ae60; }
 .boot-line .warn { color: #d4820a; }
-.boot-line .hi   { color: #e74c3c; }
+.boot-line .hi   { color: #84acca; }
 .boot-line .dim  { color: #444; }
 
 .boot-bar-wrap { margin-top: 22px; opacity: 0; transition: opacity 0.3s; }
@@ -139,7 +154,7 @@ body {
 .boot-bar-label { font-size: 13px; color: #555; margin-bottom: 6px; letter-spacing: 2px; }
 .boot-bar-track {
   width: 100%; height: 18px;
-  border: 1px solid rgba(192,57,43,0.3);
+  border: 1px solid rgba(95,134,163,0.3);
   background: #0f0f0f;
   position: relative; overflow: hidden;
 }
@@ -162,7 +177,7 @@ body {
   display: flex;
   flex-direction: column;
   z-index: 100;
-  border-right: 1px solid rgba(192,57,43,0.18);
+  border-right: 1px solid rgba(95,134,163,0.18);
 }
 
 .sidebar-header {
@@ -220,7 +235,7 @@ nav a:hover {
 }
 nav a.active {
   color: #fff;
-  background: rgba(192,57,43,0.14);
+  background: rgba(95,134,163,0.14);
   border-left-color: var(--red);
 }
 nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
@@ -230,14 +245,14 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   border-top: 1px solid rgba(255,255,255,0.04);
 }
 .sidebar-clock { font-size: 11px; color: rgba(255,255,255,0.2); letter-spacing: 1px; margin-bottom: 4px; }
-.sidebar-unit  { font-size: 8px; letter-spacing: 2px; color: rgba(192,57,43,0.45); }
+.sidebar-unit  { font-size: 8px; letter-spacing: 2px; color: rgba(95,134,163,0.45); }
 .sidebar-sound {
   margin-top: 10px; font-size: 9px; letter-spacing: 2px;
   color: rgba(255,255,255,0.4); cursor: pointer; user-select: none;
   border: 1px solid rgba(255,255,255,0.1); padding: 6px 8px; text-align: center;
   transition: all 0.18s;
 }
-.sidebar-sound:hover { color: #fff; border-color: rgba(192,57,43,0.4); }
+.sidebar-sound:hover { color: #fff; border-color: rgba(95,134,163,0.4); }
 .sidebar-sound.off { color: rgba(255,255,255,0.25); }
 
 /* ========== MAIN ========== */
@@ -262,7 +277,7 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   justify-content: space-between;
   margin-bottom: 40px;
   padding-bottom: 20px;
-  border-bottom: 1px solid rgba(192,57,43,0.4);
+  border-bottom: 1px solid rgba(95,134,163,0.4);
 }
 .ph-tag { font-size: 9px; letter-spacing: 4px; color: var(--text-muted); margin-bottom: 7px; text-transform: uppercase; }
 .ph-title {
@@ -454,7 +469,7 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 
 .model-preview-icon {
   font-size: 36px; margin-bottom: 10px;
-  filter: drop-shadow(0 0 10px rgba(192,57,43,0.5));
+  filter: drop-shadow(0 0 10px rgba(95,134,163,0.5));
 }
 
 .model-preview-label {
@@ -708,22 +723,22 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   font-family: 'Orbitron', sans-serif;
   font-size: clamp(18px, 4vw, 30px); font-weight: 900;
   letter-spacing: 4px; color: #fff; margin-bottom: 30px;
-  position: relative; text-shadow: 0 0 20px rgba(192,57,43,0.4);
+  position: relative; text-shadow: 0 0 20px rgba(95,134,163,0.4);
 }
 .lc-ring {
   position: relative; width: 180px; height: 180px; margin-bottom: 24px;
 }
 .lc-ring svg { transform: rotate(-90deg); }
-.lc-ring .lc-track { fill: none; stroke: rgba(192,57,43,0.15); stroke-width: 6; }
+.lc-ring .lc-track { fill: none; stroke: rgba(95,134,163,0.15); stroke-width: 6; }
 .lc-ring .lc-prog  { fill: none; stroke: var(--red); stroke-width: 6; stroke-linecap: round;
-  filter: drop-shadow(0 0 6px rgba(192,57,43,0.6)); transition: stroke-dashoffset 1s linear; }
+  filter: drop-shadow(0 0 6px rgba(95,134,163,0.6)); transition: stroke-dashoffset 1s linear; }
 .lc-num {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
   font-family: 'Orbitron', sans-serif; font-size: 64px; font-weight: 900; color: #fff;
 }
 .lc-msg { font-size: 16px; letter-spacing: 2px; color: var(--text-dim); min-height: 22px; position: relative; }
 .lc-bar-track {
-  width: 320px; max-width: 80vw; height: 8px; border: 1px solid rgba(192,57,43,0.3);
+  width: 320px; max-width: 80vw; height: 8px; border: 1px solid rgba(95,134,163,0.3);
   background: #0f0f0f; margin: 18px 0 10px; position: relative; overflow: hidden;
 }
 .lc-bar-fill { height: 100%; background: var(--red); width: 0; transition: width 1s linear; }
@@ -792,8 +807,8 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 .home-grid {
   position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(192,57,43,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(192,57,43,0.06) 1px, transparent 1px);
+    linear-gradient(rgba(95,134,163,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(95,134,163,0.06) 1px, transparent 1px);
   background-size: 50px 50px;
 }
 .home-scanlines {
@@ -801,15 +816,17 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px);
   pointer-events: none;
 }
-.home-label { font-size: 10px; letter-spacing: 5px; color: rgba(192,57,43,0.6); margin-bottom: 20px; animation: fadeSlide 0.6s ease both; position: relative; }
-.home-wolf-icon { font-size: 56px; margin-bottom: 14px; animation: fadeSlide 0.5s ease both; position: relative; filter: drop-shadow(0 0 16px rgba(192,57,43,0.5)); }
+.home-label { font-size: 10px; letter-spacing: 5px; color: rgba(95,134,163,0.6); margin-bottom: 20px; animation: fadeSlide 0.6s ease both; position: relative; }
+.home-wolf-icon { font-size: 56px; margin-bottom: 14px; animation: fadeSlide 0.5s ease both; position: relative; filter: drop-shadow(0 0 16px rgba(95,134,163,0.5)); }
+.home-wolf-icon img { height: 110px; width: auto; max-width: 220px; object-fit: contain; display: block; margin: 0 auto; }
+.cat-icon img { height: 20px; width: 20px; object-fit: contain; vertical-align: middle; display: inline-block; }
 .home-title {
   font-family: 'Orbitron', sans-serif;
   font-size: clamp(42px, 9vw, 96px); font-weight: 900;
   letter-spacing: 8px; color: #fff; line-height: 1;
   margin-bottom: 10px;
   animation: fadeSlide 0.6s 0.1s ease both; position: relative;
-  text-shadow: 0 0 40px rgba(192,57,43,0.25);
+  text-shadow: 0 0 40px rgba(95,134,163,0.25);
 }
 .home-title span { color: var(--red); }
 .home-sub {
@@ -823,7 +840,7 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 .home-motto {
   font-family: 'VT323', monospace; font-size: 24px; letter-spacing: 3px;
   color: rgba(255,255,255,0.6);
-  border: 1px solid rgba(192,57,43,0.2);
+  border: 1px solid rgba(95,134,163,0.2);
   border-left: 3px solid var(--red);
   padding: 12px 32px; margin-bottom: 46px;
   animation: fadeSlide 0.6s 0.3s ease both; position: relative;
@@ -838,26 +855,37 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   border: 1px solid rgba(255,255,255,0.07);
   padding: 16px 30px; text-align: center; transition: all 0.2s;
 }
-.home-stat:hover { background: rgba(192,57,43,0.1); border-color: rgba(192,57,43,0.3); }
+.home-stat:hover { background: rgba(95,134,163,0.1); border-color: rgba(95,134,163,0.3); }
 .home-stat .val { font-family: 'Orbitron', sans-serif; font-size: 19px; font-weight: 700; color: #fff; margin-bottom: 4px; }
 .home-stat .lbl { font-size: 8px; letter-spacing: 3px; color: rgba(255,255,255,0.25); }
 .home-nav-hint { position: absolute; bottom: 36px; font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.15); animation: pulse 2.5s infinite; }
 .home-board {
   position: relative; margin-top: 38px; width: 100%; max-width: 620px;
-  border: 1px solid rgba(192,57,43,0.3); background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(95,134,163,0.3); background: rgba(0,0,0,0.4);
   text-align: left; animation: fadeSlide 0.6s 0.5s ease both;
 }
 .board-head {
   font-family: 'Orbitron', sans-serif; font-size: 10px; letter-spacing: 2px;
   color: var(--red); text-transform: uppercase; padding: 12px 16px;
-  border-bottom: 1px solid rgba(192,57,43,0.25); display: flex; align-items: center; gap: 9px;
+  border-bottom: 1px solid rgba(95,134,163,0.25); display: flex; align-items: center; gap: 9px;
 }
 .board-led { width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); animation: blink 1.5s infinite; }
-.board-item { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.board-item:last-child { border-bottom: none; }
-.board-item-date { font-size: 9px; letter-spacing: 2px; color: var(--amber); margin-bottom: 5px; text-transform: uppercase; }
-.board-item-title { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #fff; letter-spacing: 1px; margin-bottom: 6px; }
-.board-item-body { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.6; }
+.board-item, .comms-item { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.board-item:last-child, .comms-item:last-child { border-bottom: none; }
+.comms-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 7px; }
+.comms-sender {
+  font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
+  letter-spacing: 1px; color: var(--red); text-transform: uppercase;
+}
+.comms-time {
+  font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 1px;
+  color: var(--amber); white-space: nowrap; flex-shrink: 0;
+}
+.comms-body {
+  font-family: 'Share Tech Mono', monospace; font-size: 12px;
+  color: rgba(255,255,255,0.75); line-height: 1.65; font-style: italic;
+  border-left: 2px solid var(--red-border); padding-left: 10px;
+}
 
 @keyframes pulse    { 50% { opacity: 0.05; } }
 @keyframes fadeSlide { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform: translateY(0); } }
@@ -946,6 +974,9 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
     watchAnnonces: (cb) => onSnapshot(collection(db, 'annonces'), s => cb(s.docs.map(d => ({ _id:d.id, ...d.data() })))),
     addAnnonce: (a) => addDoc(collection(db, 'annonces'), a),
     delAnnonce: (id) => deleteDoc(doc(db, 'annonces', id)),
+    // Config site (logo, icônes) — doc unique partagé
+    watchConfig: (cb) => onSnapshot(doc(db, 'config', 'site'), s => cb(s.exists() ? s.data() : {})),
+    setConfig: (obj) => setDoc(doc(db, 'config', 'site'), obj, { merge: true }),
     ready: true
   };
   document.dispatchEvent(new Event('fb-ready'));
@@ -969,7 +1000,13 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 
 <!-- ====== BOOT ====== -->
 <div id="boot" style="display:none;">
-  <div id="boot-inner">
+  <div id="boot-window">
+    <div class="term-titlebar">
+      <div class="dots"><span class="term-dot-r"></span><span class="term-dot-y"></span><span class="term-dot-g"></span></div>
+      <div class="term-title-txt">C:\BLACKWOLVES\BOOT — cmd.exe</div>
+      <div style="width:50px;"></div>
+    </div>
+    <div id="boot-inner">
     <div class="boot-logo">BLACK WOLVES</div>
     <div class="boot-line" id="bl0"><span class="dim">■■■ BLACK WOLVES OS v2.4 — 104ème WOLFPACK — FLOTTE COSMOS ■■■</span></div>
     <div class="boot-line" id="bl1">> Démarrage du système d'exploitation tactique...</div>
@@ -996,6 +1033,7 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
       </div>
     </div>
   </div>
+  </div>
 </div>
 
 <!-- ====== SIDEBAR ====== -->
@@ -1017,7 +1055,7 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
     <a onclick="showPage('equipement')"   id="nav-equipement">  <span class="nav-icon">▣</span>  Équipement</a>
     <a onclick="showPage('recrutement')"  id="nav-recrutement"> <span class="nav-icon">▸</span>  Recrutement</a>
     <a onclick="showPage('terminal')"     id="nav-terminal">    <span class="nav-icon">▌</span>  Terminal</a>
-    <a onclick="showDashboard()" id="nav-dashboard" style="display:none; color:#fff; background:rgba(192,57,43,0.14); border-left-color:var(--red);"><span class="nav-icon">★</span>  Commandement</a>
+    <a onclick="showDashboard()" id="nav-dashboard" style="display:none; color:#fff; background:rgba(95,134,163,0.14); border-left-color:var(--red);"><span class="nav-icon">★</span>  Commandement</a>
   </nav>
   <div class="sidebar-bottom">
     <div class="sidebar-clock" id="clock">--:--:--</div>
@@ -1033,7 +1071,7 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   <div class="page" id="page-home">
     <div class="home-grid"></div>
     <div class="home-scanlines"></div>
-    <div class="home-wolf-icon">🐺</div>
+    <div class="home-wolf-icon" id="home-logo">🐺</div>
     <div class="home-label">// 104ème BATAILLON WOLFPACK — FLOTTE COSMOS //</div>
     <div class="home-title">BLACK <span>WOLVES</span></div>
     <div class="home-sub">Compagnie d'Assaut Blindé Lourd — Grande Armée de la République</div>
@@ -1043,10 +1081,9 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
       <div class="home-stat"><div class="val">104th</div><div class="lbl">Bataillon</div></div>
       <div class="home-stat"><div class="val">ACTIF</div><div class="lbl">Statut</div></div>
       <div class="home-stat"><div class="val">BLINDÉ</div><div class="lbl">Spécialité</div></div>
-      <div class="home-stat"><div class="val">5</div><div class="lbl">Fondateurs</div></div>
     </div>
     <div class="home-board" id="home-board" style="display:none;">
-      <div class="board-head"><span class="board-led"></span> ORDRES DU JOUR — TRANSMISSION DE COMMANDEMENT</div>
+      <div class="board-head"><span class="board-led"></span> CANAL COMMS : PRIORITAIRE</div>
       <div id="board-list"></div>
     </div>
     <div class="home-nav-hint">← NAVIGUEZ VIA LE MENU</div>
@@ -1201,19 +1238,19 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 
     <!-- SECTION 1 : ÉQUIPEMENT INDIVIDUEL -->
     <div class="equip-section">
-      <div class="equip-section-title"><span class="cat-icon">🪖</span> Équipement Individuel</div>
+      <div class="equip-section-title"><span class="cat-icon" id="cat-icon-individuel">🪖</span> Équipement Individuel</div>
       <div class="equip-grid" id="equip-individuel"></div>
     </div>
 
     <!-- SECTION 2 : VÉHICULES & MARCHEURS -->
     <div class="equip-section">
-      <div class="equip-section-title"><span class="cat-icon">🦾</span> Véhicules & Marcheurs</div>
+      <div class="equip-section-title"><span class="cat-icon" id="cat-icon-vehicule">🦾</span> Véhicules & Marcheurs</div>
       <div class="equip-grid" id="equip-vehicule"></div>
     </div>
 
     <!-- SECTION 3 : CANONS & ARTILLERIE LOURDE -->
     <div class="equip-section">
-      <div class="equip-section-title"><span class="cat-icon">💥</span> Canons & Artillerie Lourde</div>
+      <div class="equip-section-title"><span class="cat-icon" id="cat-icon-canon">💥</span> Canons & Artillerie Lourde</div>
       <div class="equip-grid" id="equip-canon"></div>
     </div>
 
@@ -1383,13 +1420,13 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 
     <!-- ANNONCES PANEL -->
     <div class="dash-panel" id="dpanel-annonces">
-      <div class="dash-section-title">Mur d'Annonces — Ordres du Jour</div>
+      <div class="dash-section-title">Canal Comms — Transmissions</div>
       <div id="dash-annonces-list"></div>
       <div class="dash-form">
-        <div class="dash-form-title">+ Publier une annonce</div>
-        <div class="dash-field"><label>Titre</label><input id="f-an-title" placeholder="ex: Opération sur Felucia ce week-end"></div>
-        <div class="dash-field"><label>Message</label><textarea id="f-an-body" placeholder="Détails de l'annonce..."></textarea></div>
-        <button class="dash-add-btn" onclick="addAnnonce()">▸ Publier sur l'accueil</button>
+        <div class="dash-form-title">+ Émettre une transmission</div>
+        <div class="dash-field"><label>Expéditeur / Objet</label><input id="f-an-title" placeholder="ex: CMDM WILDFIRE — Opération Felucia"></div>
+        <div class="dash-field"><label>Message</label><textarea id="f-an-body" placeholder="Contenu de la transmission..."></textarea></div>
+        <button class="dash-add-btn" onclick="addAnnonce()">▸ Émettre sur le canal</button>
       </div>
     </div>
 
@@ -1430,6 +1467,18 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
         <span>À la <strong style="color:var(--text);">première installation</strong>, la base partagée est vide. Importez les effectifs et équipements par défaut (les 5 fondateurs + l'inventaire) en un clic. À n'utiliser qu'une seule fois.</span>
       </div>
       <button class="dash-add-btn" onclick="resetData()">▸ Importer les données par défaut</button>
+
+      <div class="dash-form" style="margin-top:28px;">
+        <div class="dash-form-title">🎨 Personnalisation des images</div>
+        <div style="font-size:11px; color:var(--text-muted); margin-bottom:14px; line-height:1.5;">Collez des URL d'images pour remplacer les emojis. Laissez vide pour garder l'emoji par défaut.</div>
+        <div class="dash-field"><label>Logo (accueil — remplace le 🐺)</label><input id="f-cfg-logo" placeholder="https://... (logo PNG transparent conseillé)"></div>
+        <div class="dash-form-grid">
+          <div class="dash-field"><label>Icône « Équipement Individuel » (🪖)</label><input id="f-cfg-ico-individuel" placeholder="https://..."></div>
+          <div class="dash-field"><label>Icône « Véhicules » (🦾)</label><input id="f-cfg-ico-vehicule" placeholder="https://..."></div>
+        </div>
+        <div class="dash-field"><label>Icône « Canons / Artillerie » (💥)</label><input id="f-cfg-ico-canon" placeholder="https://..."></div>
+        <button class="dash-add-btn" onclick="saveConfig()">▸ Enregistrer les images</button>
+      </div>
     </div>
 
   </div>
@@ -1597,7 +1646,7 @@ const DEFAULT_DATA = {
 };
 
 // Miroir en mémoire, alimenté en temps réel par Firestore
-let DATA = { effectifs: [], equipements: [], comptes: [], annonces: [] };
+let DATA = { effectifs: [], equipements: [], comptes: [], annonces: [], config: {} };
 
 // échappement HTML
 function esc(s) {
@@ -1715,16 +1764,44 @@ function renderAnnonces() {
   if (!items.length) { board.style.display = 'none'; return; }
   board.style.display = 'block';
   list.innerHTML = items.map(a => {
-    const d = a.ts ? new Date(a.ts).toLocaleDateString('fr-FR', {day:'2-digit',month:'long',year:'numeric'}) : '';
-    return `<div class="board-item">
-      <div class="board-item-date">▸ ${esc(d)}</div>
-      <div class="board-item-title">${esc(a.title)}</div>
-      <div class="board-item-body">${esc(a.body)}</div>
+    const d = a.ts ? new Date(a.ts).toLocaleString('fr-FR', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+    return `<div class="comms-item">
+      <div class="comms-line"><span class="comms-sender">▸ ${esc(a.title)}</span><span class="comms-time">${esc(d)}</span></div>
+      <div class="comms-body">« ${esc(a.body)} »</div>
     </div>`;
   }).join('');
 }
 
 function renderAll() { renderEffectifs(); renderEquipements(); renderAnnonces(); }
+
+/* ===== PERSONNALISATION IMAGES (logo + icônes catégories) ===== */
+const DEFAULT_ICONS = { logo:'🐺', individuel:'🪖', vehicule:'🦾', canon:'💥' };
+function applyConfig() {
+  const c = DATA.config || {};
+  // logo accueil
+  const logo = document.getElementById('home-logo');
+  if (logo) logo.innerHTML = c.logo ? `<img src="${esc(c.logo)}" alt="Logo" onerror="this.parentElement.textContent='🐺'">` : DEFAULT_ICONS.logo;
+  // icônes catégories équipement
+  [['individuel', c.iconIndividuel], ['vehicule', c.iconVehicule], ['canon', c.iconCanon]].forEach(([key, url]) => {
+    const el = document.getElementById('cat-icon-' + key);
+    if (el) el.innerHTML = url ? `<img src="${esc(url)}" alt="" onerror="this.parentElement.textContent='${DEFAULT_ICONS[key]}'">` : DEFAULT_ICONS[key];
+  });
+  // pré-remplit le formulaire
+  const set = (id,v) => { const e=document.getElementById(id); if(e && document.activeElement!==e) e.value = v || ''; };
+  set('f-cfg-logo', c.logo);
+  set('f-cfg-ico-individuel', c.iconIndividuel);
+  set('f-cfg-ico-vehicule', c.iconVehicule);
+  set('f-cfg-ico-canon', c.iconCanon);
+}
+function saveConfig() {
+  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
+  window.FB.setConfig({
+    logo: document.getElementById('f-cfg-logo').value.trim(),
+    iconIndividuel: document.getElementById('f-cfg-ico-individuel').value.trim(),
+    iconVehicule: document.getElementById('f-cfg-ico-vehicule').value.trim(),
+    iconCanon: document.getElementById('f-cfg-ico-canon').value.trim()
+  }).then(() => alert("Images enregistrées.")).catch(err => alert("Erreur : " + fbError(err)));
+}
 
 /* ============================================================
    TERMINAL
@@ -2207,6 +2284,7 @@ function startFirebase() {
   window.FB.watchEquip(list => { DATA.equipements = list; renderEquipements(); if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
   window.FB.watchComptes(list => { DATA.comptes = list; if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
   window.FB.watchAnnonces(list => { DATA.annonces = list; renderAnnonces(); if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
+  window.FB.watchConfig(cfg => { DATA.config = cfg || {}; applyConfig(); });
 }
 
 if (window.FB && window.FB.ready) startFirebase();
