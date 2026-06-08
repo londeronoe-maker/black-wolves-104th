@@ -373,12 +373,21 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 .member-photo.img-fail img { display: none; }
 .member-photo.img-fail .photo-fallback { display: block; }
 /* médailles */
-.member-medals { display: flex; flex-wrap: wrap; gap: 5px; padding-top: 8px; border-top: 1px solid var(--border); }
+.member-medals { display: flex; flex-wrap: wrap; gap: 5px; padding-top: 8px; border-top: 1px solid var(--border); align-items: center; }
 .medal {
   font-size: 10px; letter-spacing: 0.5px; padding: 3px 7px;
   border: 1px solid var(--amber-border); background: var(--amber-dim);
   color: var(--amber); white-space: nowrap;
 }
+.medal-img { height: 30px; width: 30px; object-fit: contain; }
+.medal-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.medal-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; padding: 4px 8px; border: 1px solid var(--amber-border);
+  background: var(--amber-dim); color: var(--amber);
+}
+.medal-chip img { height: 16px; width: 16px; object-fit: contain; }
+.medal-chip .x { cursor: pointer; color: var(--red); font-weight: bold; }
 /* organigramme par grade */
 .org-tier { margin-bottom: 30px; }
 .org-tier-head {
@@ -651,6 +660,12 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   color: var(--red); cursor: pointer; text-transform: uppercase; transition: all 0.18s; flex-shrink: 0;
 }
 .dash-del:hover { background: var(--red); color: #fff; }
+.dash-edit {
+  font-family: 'Orbitron', sans-serif; font-size: 9px; letter-spacing: 1px; font-weight: 700;
+  padding: 7px 12px; border: 1px solid var(--border-mid); background: transparent;
+  color: var(--text-dim); cursor: pointer; text-transform: uppercase; transition: all 0.18s; flex-shrink: 0;
+}
+.dash-edit:hover { border-color: var(--red); color: var(--red); }
 
 /* dash form */
 .dash-form {
@@ -961,10 +976,12 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
     // Effectifs
     watchEffectifs: (cb) => onSnapshot(collection(db, 'effectifs'), s => cb(s.docs.map(d => ({ _id:d.id, ...d.data() })))),
     addEffectif: (m) => addDoc(collection(db, 'effectifs'), m),
+    updEffectif: (id, m) => setDoc(doc(db, 'effectifs', id), m),
     delEffectif: (id) => deleteDoc(doc(db, 'effectifs', id)),
     // Équipements
     watchEquip: (cb) => onSnapshot(collection(db, 'equipements'), s => cb(s.docs.map(d => ({ _id:d.id, ...d.data() })))),
     addEquip: (e) => addDoc(collection(db, 'equipements'), e),
+    updEquip: (id, e) => setDoc(doc(db, 'equipements', id), e),
     delEquip: (id) => deleteDoc(doc(db, 'equipements', id)),
     // Comptes (registre des membres créés — pour la liste; rôle dans /roles)
     watchComptes: (cb) => onSnapshot(collection(db, 'comptes'), s => cb(s.docs.map(d => ({ _id:d.id, ...d.data() })))),
@@ -973,10 +990,24 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
     // Annonces (mur d'accueil)
     watchAnnonces: (cb) => onSnapshot(collection(db, 'annonces'), s => cb(s.docs.map(d => ({ _id:d.id, ...d.data() })))),
     addAnnonce: (a) => addDoc(collection(db, 'annonces'), a),
+    updAnnonce: (id, a) => setDoc(doc(db, 'annonces', id), a),
     delAnnonce: (id) => deleteDoc(doc(db, 'annonces', id)),
     // Config site (logo, icônes) — doc unique partagé
     watchConfig: (cb) => onSnapshot(doc(db, 'config', 'site'), s => cb(s.exists() ? s.data() : {})),
     setConfig: (obj) => setDoc(doc(db, 'config', 'site'), obj, { merge: true }),
+    // Lore (timeline)
+    watchLore: (cb) => onSnapshot(collection(db, 'lore'), s => cb(s.docs.map(d => ({ _id:d.id, ...d.data() })))),
+    addLore: (l) => addDoc(collection(db, 'lore'), l),
+    updLore: (id, l) => setDoc(doc(db, 'lore', id), l),
+    delLore: (id) => deleteDoc(doc(db, 'lore', id)),
+    // Contenu éditable (recrutement, intro lore) — doc unique
+    watchContenu: (cb) => onSnapshot(doc(db, 'contenu', 'pages'), s => cb(s.exists() ? s.data() : {})),
+    setContenu: (obj) => setDoc(doc(db, 'contenu', 'pages'), obj, { merge: true }),
+    // Médailles (bibliothèque)
+    watchMedailles: (cb) => onSnapshot(collection(db, 'medailles'), s => cb(s.docs.map(d => ({ _id:d.id, ...d.data() })))),
+    addMedaille: (m) => addDoc(collection(db, 'medailles'), m),
+    updMedaille: (id, m) => setDoc(doc(db, 'medailles', id), m),
+    delMedaille: (id) => deleteDoc(doc(db, 'medailles', id)),
     ready: true
   };
   document.dispatchEvent(new Event('fb-ready'));
@@ -1163,45 +1194,9 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
     </div>
     <div class="info-box">
       <span class="ib-icon">ℹ</span>
-      <span>DOSSIER DÉCLASSIFIÉ — Origine et formation de la Compagnie Black Wolves, 104ème Bataillon Wolfpack.</span>
+      <span id="lore-intro">DOSSIER DÉCLASSIFIÉ — Origine et formation de la Compagnie Black Wolves, 104ème Bataillon Wolfpack.</span>
     </div>
-    <div class="timeline">
-      <div class="timeline-item">
-        <div class="tl-date">Seconde Bataille de Felucia</div>
-        <div class="tl-title">L'Embuscade</div>
-        <div class="tl-body">
-          Lors de la Seconde Bataille de Felucia, le 104ème Bataillon Wolfpack et la 501ème Légion furent déployés pour reprendre la planète des mains de la CSI. Les combats atteignirent une violence extrême — chaque mètre de jungle coûtait du sang.<br><br>
-          L'aile droite de la formation du 104ème tomba dans une embuscade dévastatrice orchestrée par la Confédération. Le massacre fut total. Des dizaines de clones périrent sous les tirs de droïdes et les bombardements incessants.
-        </div>
-      </div>
-      <div class="timeline-item">
-        <div class="tl-date">Rapport de survivance — 5 clones</div>
-        <div class="tl-title">Les Cinq Survivants</div>
-        <div class="tl-body">
-          Quand le nuage de fumée se leva, seuls cinq clones avaient survécu à l'attaque :<br><br>
-          <span class="tl-name">▸ WILDFIRE</span> — Leader, commandant de l'opération de survie<br>
-          <span class="tl-name">▸ FENRIR</span> — Expert démolition et explosifs<br>
-          <span class="tl-name">▸ SPITTER</span> — Soldat d'élite, pilote de combat<br>
-          <span class="tl-name">▸ BOLT</span> — Stratège tactique<br>
-          <span class="tl-name">▸ MOUSE</span> — Technicien, ingénieur de génie
-        </div>
-      </div>
-      <div class="timeline-item">
-        <div class="tl-date">Opération contre-attaque</div>
-        <div class="tl-title">Cinq contre un bataillon</div>
-        <div class="tl-body">
-          Piégés derrière les lignes ennemies, sans soutien ni ravitaillement, les cinq clones refusèrent d'abandonner. Mouse détourna des cargaisons d'explosifs CIS. Spitter remit en marche un AT-TE abandonné et servit de diversion. Fenrir piegea les cargaisons de ravitaillement. L'explosion fut visible à plusieurs kilomètres — un bataillon entier anéanti.
-        </div>
-      </div>
-      <div class="timeline-item highlight">
-        <div class="tl-date">Naissance d'une légende</div>
-        <div class="tl-title">Les Black Wolves</div>
-        <div class="tl-body">
-          Ce qui devait être une défaite devint une victoire. À leur retour, les cinq survivants furent accueillis en héros et surnommés : <span class="tl-hi">LES BLACK WOLVES</span>.<br><br>
-          En reconnaissance de leurs actions, ils fondèrent leur propre compagnie, spécialisée dans le pilotage de blindés et l'utilisation d'explosifs. Depuis ce jour, leur nom inspire le respect dans toute la Grande Armée de la République.
-        </div>
-      </div>
-    </div>
+    <div class="timeline" id="lore-timeline"></div>
     <div class="page-footer"><span>BLACK WOLVES // 104ème WOLFPACK</span><span class="pf-red">DÉCLASSIFIÉ — BW-02</span></div>
   </div>
 
@@ -1266,17 +1261,17 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
       </div>
       <div class="ph-badge green"><div class="dot"></div> SÉLECTION OUVERTE</div>
     </div>
-    <div class="motto-banner">« LA MEUTE NE RECRUTE PAS DES SOLDATS — ELLE FORGE DES GUERRIERS »</div>
+    <div class="motto-banner" id="rec-motto">« LA MEUTE NE RECRUTE PAS DES SOLDATS — ELLE FORGE DES GUERRIERS »</div>
     <div class="grid-2">
       <div>
         <div class="card accent-red">
           <span class="card-tag">// Protocole de sélection</span>
           <div class="card-title">Conditions d'Accès</div>
-          <div class="card-body">
+          <div class="card-body" id="rec-intro">
             La Black Wolves ne recrute pas des soldats ordinaires. Nous cherchons des guerriers capables de piloter les machines de guerre les plus lourdes, de survivre derrière les lignes ennemies et de faire pencher la balance d'une bataille entière.
           </div>
         </div>
-        <ul class="req-list">
+        <ul class="req-list" id="rec-conditions">
           <li>Maîtrise du pilotage de marcheurs blindés (AT-TE, TX-225, AT-RT) ou volonté de formation</li>
           <li>Capacité à opérer sous pression extrême et sans soutien extérieur</li>
           <li>Esprit d'équipe — la meute est plus forte que l'individu</li>
@@ -1296,14 +1291,14 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
         <div class="card accent-amber">
           <span class="card-tag">// Voie d'avancement</span>
           <div class="card-title">Progression au sein de la Meute</div>
-          <div class="card-body">
+          <div class="card-body" id="rec-avancement">
             Rejoindre la Black Wolves n'est que le début. Les soldats démontrant une initiative exceptionnelle et des aptitudes de commandement peuvent accéder à des grades supérieurs et être recommandés pour des programmes d'élite au sein du 104ème Bataillon.
           </div>
         </div>
         <div class="card accent-red">
           <span class="card-tag">// Code de la meute</span>
           <div class="card-title">Valeurs Black Wolves</div>
-          <div class="card-body">
+          <div class="card-body" id="rec-valeurs">
             <span style="color:var(--red);">▸ LOYAUTÉ</span> — envers la République et la meute<br>
             <span style="color:var(--red);">▸ PUISSANCE</span> — blindage, feu, démolition<br>
             <span style="color:var(--red);">▸ FRATERNITÉ</span> — la meute survit ensemble<br>
@@ -1353,6 +1348,8 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
     <div class="dash-tab active" onclick="dashTab('effectifs')" id="dtab-effectifs">Effectifs</div>
     <div class="dash-tab" onclick="dashTab('equipements')" id="dtab-equipements">Équipements</div>
     <div class="dash-tab" onclick="dashTab('annonces')" id="dtab-annonces">Annonces</div>
+    <div class="dash-tab" onclick="dashTab('medailles')" id="dtab-medailles" style="display:none;">Médailles</div>
+    <div class="dash-tab" onclick="dashTab('contenu')" id="dtab-contenu" style="display:none;">Contenu</div>
     <div class="dash-tab" onclick="dashTab('comptes')" id="dtab-comptes" style="display:none;">Comptes</div>
     <div class="dash-tab" onclick="dashTab('systeme')" id="dtab-systeme">Système</div>
   </div>
@@ -1384,9 +1381,17 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
         </div>
         <div class="dash-field"><label>Spécialité / Poste</label><input id="f-mem-id" placeholder="ex: Pilote de Combat"></div>
         <div class="dash-field"><label>Rôle / Description</label><textarea id="f-mem-role" placeholder="Description du rôle dans la compagnie"></textarea></div>
-        <div class="dash-field"><label>Médailles / Décorations (séparées par une virgule)</label><input id="f-mem-medals" placeholder="ex: 🎖️ Héros de Felucia, 🏅 Bravoure, ⭐ Vétéran"></div>
+        <div class="dash-field"><label>Médailles / Décorations</label>
+          <div style="display:flex; gap:8px;">
+            <select id="f-mem-medal-pick" style="flex:1;"><option value="">— Choisir une médaille —</option></select>
+            <button type="button" class="dash-add-btn" style="margin:0; padding:9px 16px;" onclick="addMedalToDraft()">+ Ajouter</button>
+          </div>
+          <div id="f-mem-medals-chips" class="medal-chips"></div>
+          <div style="font-size:10px; color:var(--text-muted); margin-top:6px;">Créez d'abord vos médailles dans l'onglet « Médailles ».</div>
+        </div>
         <div class="dash-field"><label>Image (URL, optionnel)</label><input id="f-mem-img" placeholder="https://... (lien vers une photo)"></div>
-        <button class="dash-add-btn" onclick="addMember()">▸ Ajouter à la meute</button>
+        <button class="dash-add-btn" id="btn-mem" onclick="addMember()">▸ Ajouter à la meute</button>
+        <button class="dash-add-btn" id="btn-mem-cancel" onclick="cancelEditMember()" style="display:none; background:transparent; border-color:var(--border-mid); color:var(--text-dim); margin-left:8px;">Annuler</button>
       </div>
     </div>
 
@@ -1414,7 +1419,8 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
           <div class="dash-field"><label>ID modèle Sketchfab (optionnel)</label><input id="f-eq-sf" placeholder="ex: 133cbdf..."></div>
         </div>
         <div style="font-size:10px; color:var(--text-muted); margin:-4px 0 12px; line-height:1.5;">Priorité d'affichage : image &gt; modèle 3D &gt; icône.</div>
-        <button class="dash-add-btn" onclick="addEquip()">▸ Ajouter à l'inventaire</button>
+        <button class="dash-add-btn" id="btn-eq" onclick="addEquip()">▸ Ajouter à l'inventaire</button>
+        <button class="dash-add-btn" id="btn-eq-cancel" onclick="cancelEditEquip()" style="display:none; background:transparent; border-color:var(--border-mid); color:var(--text-dim); margin-left:8px;">Annuler</button>
       </div>
     </div>
 
@@ -1426,7 +1432,55 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
         <div class="dash-form-title">+ Émettre une transmission</div>
         <div class="dash-field"><label>Expéditeur / Objet</label><input id="f-an-title" placeholder="ex: CMDM WILDFIRE — Opération Felucia"></div>
         <div class="dash-field"><label>Message</label><textarea id="f-an-body" placeholder="Contenu de la transmission..."></textarea></div>
-        <button class="dash-add-btn" onclick="addAnnonce()">▸ Émettre sur le canal</button>
+        <button class="dash-add-btn" id="btn-an" onclick="addAnnonce()">▸ Émettre sur le canal</button>
+        <button class="dash-add-btn" id="btn-an-cancel" onclick="cancelEditAnnonce()" style="display:none; background:transparent; border-color:var(--border-mid); color:var(--text-dim); margin-left:8px;">Annuler</button>
+      </div>
+    </div>
+
+    <!-- MÉDAILLES PANEL -->
+    <div class="dash-panel" id="dpanel-medailles">
+      <div class="dash-section-title">Bibliothèque de Médailles</div>
+      <div class="info-box"><span class="ib-icon">ℹ</span><span>Créez vos médailles ici. Elles apparaîtront dans le menu déroulant lors de l'ajout/modification d'un membre.</span></div>
+      <div id="dash-medailles-list"></div>
+      <div class="dash-form">
+        <div class="dash-form-title" id="med-form-title">+ Créer une médaille</div>
+        <div class="dash-field"><label>Nom de la médaille</label><input id="f-med-name" placeholder="ex: Héros de Felucia"></div>
+        <div class="dash-field"><label>Image (URL, optionnel)</label><input id="f-med-img" placeholder="https://... (icône de médaille)"></div>
+        <button class="dash-add-btn" id="btn-med" onclick="addMedaille()">▸ Créer la médaille</button>
+        <button class="dash-add-btn" id="btn-med-cancel" onclick="cancelEditMedaille()" style="display:none; background:transparent; border-color:var(--border-mid); color:var(--text-dim); margin-left:8px;">Annuler</button>
+      </div>
+    </div>
+
+    <!-- CONTENU PANEL -->
+    <div class="dash-panel" id="dpanel-contenu">
+      <div class="dash-section-title">Contenu — Lore & Recrutement</div>
+
+      <div class="dash-form">
+        <div class="dash-form-title">📜 Archives / Lore</div>
+        <div class="dash-field"><label>Texte d'introduction (encart)</label><textarea id="f-lore-intro" placeholder="Texte affiché en haut de la page Lore"></textarea></div>
+        <button class="dash-add-btn" onclick="saveLoreIntro()">▸ Enregistrer l'intro</button>
+        <div style="height:18px;"></div>
+        <div class="dash-form-title">Événements de la timeline</div>
+        <div id="dash-lore-list"></div>
+        <div style="margin-top:14px; border-top:1px solid var(--border); padding-top:14px;">
+          <div class="dash-form-title" id="lore-form-title">+ Ajouter un événement</div>
+          <div class="dash-field"><label>Date / Époque</label><input id="f-lore-date" placeholder="ex: Seconde Bataille de Felucia"></div>
+          <div class="dash-field"><label>Titre</label><input id="f-lore-title" placeholder="ex: L'Embuscade"></div>
+          <div class="dash-field"><label>Texte</label><textarea id="f-lore-body" placeholder="Récit de l'événement..."></textarea></div>
+          <div class="dash-field"><label><input type="checkbox" id="f-lore-hl" style="width:auto; margin-right:6px;">Événement marquant (mis en évidence)</label></div>
+          <button class="dash-add-btn" id="btn-lore" onclick="addLore()">▸ Ajouter l'événement</button>
+          <button class="dash-add-btn" id="btn-lore-cancel" onclick="cancelEditLore()" style="display:none; background:transparent; border-color:var(--border-mid); color:var(--text-dim); margin-left:8px;">Annuler</button>
+        </div>
+      </div>
+
+      <div class="dash-form" style="margin-top:20px;">
+        <div class="dash-form-title">🎯 Recrutement</div>
+        <div class="dash-field"><label>Bannière (devise en haut)</label><input id="f-rec-motto" placeholder="« LA MEUTE NE RECRUTE PAS... »"></div>
+        <div class="dash-field"><label>Conditions d'accès (intro)</label><textarea id="f-rec-intro"></textarea></div>
+        <div class="dash-field"><label>Liste des conditions (une par ligne)</label><textarea id="f-rec-conditions" placeholder="Une condition par ligne"></textarea></div>
+        <div class="dash-field"><label>Voie d'avancement</label><textarea id="f-rec-avancement"></textarea></div>
+        <div class="dash-field"><label>Valeurs (une par ligne, format : TITRE — description)</label><textarea id="f-rec-valeurs" placeholder="LOYAUTÉ — envers la République"></textarea></div>
+        <button class="dash-add-btn" onclick="saveRecrutement()">▸ Enregistrer le recrutement</button>
       </div>
     </div>
 
@@ -1646,7 +1700,7 @@ const DEFAULT_DATA = {
 };
 
 // Miroir en mémoire, alimenté en temps réel par Firestore
-let DATA = { effectifs: [], equipements: [], comptes: [], annonces: [], config: {} };
+let DATA = { effectifs: [], equipements: [], comptes: [], annonces: [], config: {}, lore: [], contenu: {}, medailles: [] };
 
 // échappement HTML
 function esc(s) {
@@ -1659,7 +1713,14 @@ function memberCardHTML(m) {
     ? `<div class="member-photo"><img src="${esc(m.img)}" alt="${esc(m.name)}" loading="lazy" onerror="this.parentElement.classList.add('img-fail')"><span class="photo-fallback">${esc(m.name)}</span></div>`
     : '';
   const medals = (Array.isArray(m.medals) && m.medals.length)
-    ? `<div class="member-medals">${m.medals.map(md => `<span class="medal" title="${esc(md)}">${esc(md)}</span>`).join('')}</div>`
+    ? `<div class="member-medals">${m.medals.map(md => {
+        if (md && typeof md === 'object') {
+          return md.img
+            ? `<img class="medal-img" src="${esc(md.img)}" alt="${esc(md.name)}" title="${esc(md.name)}" onerror="this.outerHTML='<span class=\\'medal\\'>${esc(md.name)}</span>'">`
+            : `<span class="medal" title="${esc(md.name)}">${esc(md.name)}</span>`;
+        }
+        return `<span class="medal" title="${esc(md)}">${esc(md)}</span>`;
+      }).join('')}</div>`
     : '';
   return `<div class="member-card${m.img?' has-photo':''}">
     ${photo}
@@ -1772,7 +1833,46 @@ function renderAnnonces() {
   }).join('');
 }
 
-function renderAll() { renderEffectifs(); renderEquipements(); renderAnnonces(); }
+function renderAll() { renderEffectifs(); renderEquipements(); renderAnnonces(); renderLore(); applyContenu(); }
+
+/* ===== RENDU LORE (timeline depuis Firebase) ===== */
+function renderLore() {
+  const tl = document.getElementById('lore-timeline');
+  if (!tl) return;
+  if (!DATA.lore.length) {
+    tl.innerHTML = '<div style="color:var(--text-muted); font-size:13px;">Aucun événement. Ajoutez-en via le dashboard (onglet Contenu).</div>';
+    return;
+  }
+  const items = [...DATA.lore].sort((a,b) => (a.order||0) - (b.order||0));
+  tl.innerHTML = items.map(l => `<div class="timeline-item${l.highlight?' highlight':''}">
+    <div class="tl-date">${esc(l.date)}</div>
+    <div class="tl-title">${esc(l.title)}</div>
+    <div class="tl-body">${esc(l.body).replace(/\n/g,'<br>')}</div>
+  </div>`).join('');
+}
+
+/* ===== CONTENU ÉDITABLE (lore intro + recrutement) ===== */
+function applyContenu() {
+  const c = DATA.contenu || {};
+  const setText = (id, val) => { const e = document.getElementById(id); if (e && val) e.innerHTML = esc(val).replace(/\n/g,'<br>'); };
+  setText('lore-intro', c.loreIntro);
+  setText('rec-motto', c.recMotto);
+  setText('rec-intro', c.recIntro);
+  setText('rec-avancement', c.recAvancement);
+  if (c.recConditions) {
+    const ul = document.getElementById('rec-conditions');
+    if (ul) ul.innerHTML = c.recConditions.split('\n').filter(Boolean).map(l => `<li>${esc(l.trim())}</li>`).join('');
+  }
+  if (c.recValeurs) {
+    const v = document.getElementById('rec-valeurs');
+    if (v) v.innerHTML = c.recValeurs.split('\n').filter(Boolean).map(l => {
+      const parts = l.split('—');
+      const head = parts.shift().trim();
+      const rest = parts.join('—').trim();
+      return `<span style="color:var(--red);">▸ ${esc(head)}</span>${rest?' — '+esc(rest):''}<br>`;
+    }).join('');
+  }
+}
 
 /* ===== PERSONNALISATION IMAGES (logo + icônes catégories) ===== */
 const DEFAULT_ICONS = { logo:'🐺', individuel:'🪖', vehicule:'🦾', canon:'💥' };
@@ -2025,11 +2125,25 @@ function openDashboard() {
   soundOpen();
   const d = document.getElementById('dashboard');
   document.getElementById('dash-user-label').textContent = 'CONNECTÉ : ' + (currentUser ? currentUser.toUpperCase() : '') + (currentRole ? ' · ' + currentRole.toUpperCase() : '');
-  // onglet Comptes réservé aux admins
-  document.getElementById('dtab-comptes').style.display = (currentRole === 'admin') ? '' : 'none';
+  const isAdmin = (currentRole === 'admin');
+  document.getElementById('dtab-comptes').style.display = isAdmin ? '' : 'none';
+  document.getElementById('dtab-medailles').style.display = isAdmin ? '' : 'none';
+  document.getElementById('dtab-contenu').style.display = isAdmin ? '' : 'none';
+  prefillContenuForm();
+  refreshMedalDropdown();
   dashTab('effectifs');
   renderDashLists();
   d.classList.add('active');
+}
+function prefillContenuForm() {
+  const c = DATA.contenu || {};
+  const set = (id,v) => { const e=document.getElementById(id); if(e) e.value = v || ''; };
+  set('f-lore-intro', c.loreIntro);
+  set('f-rec-motto', c.recMotto);
+  set('f-rec-intro', c.recIntro);
+  set('f-rec-conditions', c.recConditions);
+  set('f-rec-avancement', c.recAvancement);
+  set('f-rec-valeurs', c.recValeurs);
 }
 function dashLogout() {
   if (window.FB) window.FB.signOut();
@@ -2052,6 +2166,7 @@ function renderDashLists() {
       <div class="dash-row-title">${esc(m.name)}</div>
       <div class="dash-row-sub">${esc(m.id)} — ${esc(m.role)}</div>
     </div>
+    <button class="dash-edit" onclick="editMember('${esc(m._id)}')">✎ Modifier</button>
     <button class="dash-del" onclick="delMember('${esc(m._id)}')">✕ Retirer</button>
   </div>`).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucun membre. Utilisez l\'onglet Système pour importer les données par défaut.</div>';
 
@@ -2065,6 +2180,7 @@ function renderDashLists() {
       <div class="dash-row-title">${esc(e.icon||'')} ${esc(e.name)}</div>
       <div class="dash-row-sub">${esc(e.desc)}</div>
     </div>
+    <button class="dash-edit" onclick="editEquip('${esc(e._id)}')">✎ Modifier</button>
     <button class="dash-del" onclick="delEquip('${esc(e._id)}')">✕ Retirer</button>
   </div>`).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucun équipement.</div>';
 
@@ -2093,24 +2209,78 @@ function renderDashLists() {
           <div class="dash-row-title">${esc(a.title)}</div>
           <div class="dash-row-sub">${esc(a.body)}</div>
         </div>
+        <button class="dash-edit" onclick="editAnnonce('${esc(a._id)}')">✎ Modifier</button>
         <button class="dash-del" onclick="delAnnonce('${esc(a._id)}')">✕ Retirer</button>
       </div>`;
     }).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucune annonce publiée.</div>';
+  }
+
+  // Médailles
+  const ml = document.getElementById('dash-medailles-list');
+  if (ml) {
+    ml.innerHTML = DATA.medailles.map(md => `<div class="dash-row">
+      ${md.img ? `<img class="dash-thumb" src="${esc(md.img)}" alt="" onerror="this.style.display='none'">` : '<span class="dash-thumb" style="display:flex;align-items:center;justify-content:center;">🎖️</span>'}
+      <div class="dash-row-info">
+        <div class="dash-row-title">${esc(md.name)}</div>
+        <div class="dash-row-sub">${md.img ? 'Avec image' : 'Sans image'}</div>
+      </div>
+      <button class="dash-edit" onclick="editMedaille('${esc(md._id)}')">✎ Modifier</button>
+      <button class="dash-del" onclick="delMedaille('${esc(md._id)}')">✕ Retirer</button>
+    </div>`).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucune médaille. Créez-en ci-dessous.</div>';
+  }
+
+  // Lore
+  const ll = document.getElementById('dash-lore-list');
+  if (ll) {
+    const items = [...DATA.lore].sort((a,b) => (a.order||0) - (b.order||0));
+    ll.innerHTML = items.map(l => `<div class="dash-row">
+      <div class="dash-row-info">
+        <div class="dash-row-meta">${esc(l.date)}${l.highlight?' · ★':''}</div>
+        <div class="dash-row-title">${esc(l.title)}</div>
+        <div class="dash-row-sub">${esc((l.body||'').slice(0,90))}${(l.body||'').length>90?'…':''}</div>
+      </div>
+      <button class="dash-edit" onclick="editLore('${esc(l._id)}')">✎ Modifier</button>
+      <button class="dash-del" onclick="delLore('${esc(l._id)}')">✕ Retirer</button>
+    </div>`).join('') || '<div class="dash-row-sub" style="color:var(--text-muted);">Aucun événement.</div>';
   }
 
   document.getElementById('stat-members').textContent = DATA.effectifs.length;
   document.getElementById('stat-equip').textContent = DATA.equipements.length;
 }
 
-/* ===== CRUD ANNONCES ===== */
+/* ===== CRUD ANNONCES (avec édition) ===== */
+let editingAnnonceId = null;
+function resetAnnonceForm() {
+  editingAnnonceId = null;
+  document.getElementById('f-an-title').value='';
+  document.getElementById('f-an-body').value='';
+  document.getElementById('btn-an').textContent = '▸ Émettre sur le canal';
+  document.getElementById('btn-an-cancel').style.display = 'none';
+}
+function cancelEditAnnonce() { resetAnnonceForm(); }
 function addAnnonce() {
   if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
   const title = document.getElementById('f-an-title').value.trim();
   const body = document.getElementById('f-an-body').value.trim();
-  if (!title || !body) { alert("Titre et message requis."); return; }
-  window.FB.addAnnonce({ title, body, ts: Date.now() })
-    .then(() => { document.getElementById('f-an-title').value=''; document.getElementById('f-an-body').value=''; })
-    .catch(err => alert("Erreur : " + fbError(err)));
+  if (!title || !body) { alert("Expéditeur/objet et message requis."); return; }
+  let op;
+  if (editingAnnonceId) {
+    const ex = DATA.annonces.find(x => x._id === editingAnnonceId);
+    op = window.FB.updAnnonce(editingAnnonceId, { title, body, ts: ex ? (ex.ts || Date.now()) : Date.now() });
+  } else {
+    op = window.FB.addAnnonce({ title, body, ts: Date.now() });
+  }
+  op.then(resetAnnonceForm).catch(err => alert("Erreur : " + fbError(err)));
+}
+function editAnnonce(id) {
+  const a = DATA.annonces.find(x => x._id === id); if (!a) return;
+  editingAnnonceId = id;
+  document.getElementById('f-an-title').value = a.title || '';
+  document.getElementById('f-an-body').value = a.body || '';
+  document.getElementById('btn-an').textContent = '✓ Enregistrer les modifications';
+  document.getElementById('btn-an-cancel').style.display = '';
+  dashTab('annonces');
+  document.getElementById('f-an-title').scrollIntoView({behavior:'smooth', block:'center'});
 }
 function delAnnonce(id) {
   if (currentRole !== 'admin') return;
@@ -2148,27 +2318,84 @@ function delAccount(uid, email) {
     .catch(err => alert("Erreur : " + fbError(err)));
 }
 
-/* ===== CRUD EFFECTIFS ===== */
-function addMember() {
-  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
-  const name = document.getElementById('f-mem-name').value.trim();
-  if (!name) { alert('Le nom de code est requis.'); return; }
+/* ===== MÉDAILLES — brouillon pour le formulaire membre ===== */
+let memberMedalsDraft = [];
+function refreshMedalDropdown() {
+  const sel = document.getElementById('f-mem-medal-pick');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Choisir une médaille —</option>' +
+    DATA.medailles.map(md => `<option value="${esc(md._id)}">${esc(md.name)}</option>`).join('');
+  sel.value = cur;
+}
+function renderMedalChips() {
+  const box = document.getElementById('f-mem-medals-chips');
+  if (!box) return;
+  box.innerHTML = memberMedalsDraft.map((md, i) =>
+    `<span class="medal-chip">${md.img?`<img src="${esc(md.img)}" alt="">`:''}${esc(md.name)} <span class="x" onclick="removeMedalFromDraft(${i})">✕</span></span>`
+  ).join('');
+}
+function addMedalToDraft() {
+  const sel = document.getElementById('f-mem-medal-pick');
+  const id = sel.value; if (!id) return;
+  const md = DATA.medailles.find(m => m._id === id); if (!md) return;
+  if (memberMedalsDraft.some(x => x.name === md.name)) return;
+  memberMedalsDraft.push({ name: md.name, img: md.img || '' });
+  renderMedalChips();
+  sel.value = '';
+}
+function removeMedalFromDraft(i) { memberMedalsDraft.splice(i,1); renderMedalChips(); }
+
+/* ===== CRUD EFFECTIFS (avec édition) ===== */
+let editingMemberId = null;
+function memberFormData() {
   const tierSel = document.getElementById('f-mem-tier');
-  window.FB.addEffectif({
+  return {
     rank: document.getElementById('f-mem-rank').value.trim() || '▲ Soldat',
-    name: name.toUpperCase(),
+    name: document.getElementById('f-mem-name').value.trim().toUpperCase(),
     id: document.getElementById('f-mem-id').value.trim() || 'Membre',
     role: document.getElementById('f-mem-role').value.trim() || '—',
     badge: document.getElementById('f-mem-badge').value.trim() || 'ACTIF',
     tier: parseInt(tierSel.value, 10) || 50,
     tierLabel: tierSel.options[tierSel.selectedIndex].text,
-    medals: document.getElementById('f-mem-medals').value.split(',').map(s => s.trim()).filter(Boolean),
+    medals: memberMedalsDraft.slice(),
     img: document.getElementById('f-mem-img').value.trim()
-  }).then(() => {
-    ['f-mem-name','f-mem-rank','f-mem-id','f-mem-role','f-mem-medals','f-mem-img'].forEach(id => document.getElementById(id).value='');
-    document.getElementById('f-mem-badge').value = 'ACTIF';
-    document.getElementById('f-mem-tier').value = '50';
-  }).catch(err => alert("Erreur : " + fbError(err)));
+  };
+}
+function resetMemberForm() {
+  editingMemberId = null;
+  memberMedalsDraft = [];
+  ['f-mem-name','f-mem-rank','f-mem-id','f-mem-role','f-mem-img'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f-mem-badge').value = 'ACTIF';
+  document.getElementById('f-mem-tier').value = '50';
+  renderMedalChips();
+  document.getElementById('btn-mem').textContent = '▸ Ajouter à la meute';
+  document.getElementById('btn-mem-cancel').style.display = 'none';
+}
+function cancelEditMember() { resetMemberForm(); }
+function addMember() {
+  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
+  const data = memberFormData();
+  if (!data.name) { alert('Le nom de code est requis.'); return; }
+  const op = editingMemberId ? window.FB.updEffectif(editingMemberId, data) : window.FB.addEffectif(data);
+  op.then(resetMemberForm).catch(err => alert("Erreur : " + fbError(err)));
+}
+function editMember(id) {
+  const m = DATA.effectifs.find(x => x._id === id); if (!m) return;
+  editingMemberId = id;
+  document.getElementById('f-mem-name').value = m.name || '';
+  document.getElementById('f-mem-rank').value = m.rank || '';
+  document.getElementById('f-mem-id').value = m.id || '';
+  document.getElementById('f-mem-role').value = m.role || '';
+  document.getElementById('f-mem-badge').value = m.badge || 'ACTIF';
+  document.getElementById('f-mem-tier').value = String(m.tier || 50);
+  document.getElementById('f-mem-img').value = m.img || '';
+  memberMedalsDraft = (Array.isArray(m.medals) ? m.medals : []).map(md => typeof md === 'object' ? {name:md.name,img:md.img||''} : {name:md,img:''});
+  renderMedalChips();
+  document.getElementById('btn-mem').textContent = '✓ Enregistrer les modifications';
+  document.getElementById('btn-mem-cancel').style.display = '';
+  dashTab('effectifs');
+  document.getElementById('f-mem-name').scrollIntoView({behavior:'smooth', block:'center'});
 }
 function delMember(id) {
   if (currentRole !== 'admin') return;
@@ -2177,30 +2404,152 @@ function delMember(id) {
   window.FB.delEffectif(id).catch(err => alert("Erreur : " + fbError(err)));
 }
 
-/* ===== CRUD ÉQUIPEMENTS ===== */
-function addEquip() {
-  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
-  const code = document.getElementById('f-eq-code').value.trim();
-  const name = document.getElementById('f-eq-name').value.trim();
-  if (!code || !name) { alert('Le code et le nom sont requis.'); return; }
-  window.FB.addEquip({
+/* ===== CRUD ÉQUIPEMENTS (avec édition) ===== */
+let editingEquipId = null;
+function equipFormData() {
+  return {
     cat: document.getElementById('f-eq-cat').value,
-    code: code.toUpperCase(),
-    name: name,
+    code: document.getElementById('f-eq-code').value.trim().toUpperCase(),
+    name: document.getElementById('f-eq-name').value.trim(),
     desc: document.getElementById('f-eq-desc').value.trim() || '—',
     icon: document.getElementById('f-eq-icon').value.trim() || '📦',
     sf: document.getElementById('f-eq-sf').value.trim(),
     img: document.getElementById('f-eq-img').value.trim()
-  }).then(() => {
-    ['f-eq-code','f-eq-name','f-eq-desc','f-eq-sf','f-eq-img'].forEach(id => document.getElementById(id).value='');
-    document.getElementById('f-eq-icon').value = '📦';
-  }).catch(err => alert("Erreur : " + fbError(err)));
+  };
+}
+function resetEquipForm() {
+  editingEquipId = null;
+  ['f-eq-code','f-eq-name','f-eq-desc','f-eq-sf','f-eq-img'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f-eq-icon').value = '📦';
+  document.getElementById('btn-eq').textContent = "▸ Ajouter à l'inventaire";
+  document.getElementById('btn-eq-cancel').style.display = 'none';
+}
+function cancelEditEquip() { resetEquipForm(); }
+function addEquip() {
+  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
+  const data = equipFormData();
+  if (!data.code || !data.name) { alert('Le code et le nom sont requis.'); return; }
+  const op = editingEquipId ? window.FB.updEquip(editingEquipId, data) : window.FB.addEquip(data);
+  op.then(resetEquipForm).catch(err => alert("Erreur : " + fbError(err)));
+}
+function editEquip(id) {
+  const e = DATA.equipements.find(x => x._id === id); if (!e) return;
+  editingEquipId = id;
+  document.getElementById('f-eq-cat').value = e.cat || 'individuel';
+  document.getElementById('f-eq-code').value = e.code || '';
+  document.getElementById('f-eq-name').value = e.name || '';
+  document.getElementById('f-eq-desc').value = e.desc || '';
+  document.getElementById('f-eq-icon').value = e.icon || '📦';
+  document.getElementById('f-eq-sf').value = e.sf || '';
+  document.getElementById('f-eq-img').value = e.img || '';
+  document.getElementById('btn-eq').textContent = '✓ Enregistrer les modifications';
+  document.getElementById('btn-eq-cancel').style.display = '';
+  dashTab('equipements');
+  document.getElementById('f-eq-code').scrollIntoView({behavior:'smooth', block:'center'});
 }
 function delEquip(id) {
   if (currentRole !== 'admin') return;
   const e = DATA.equipements.find(x => x._id === id);
   if (!confirm('Retirer ' + (e?e.name:'') + ' de l\'inventaire ?')) return;
   window.FB.delEquip(id).catch(err => alert("Erreur : " + fbError(err)));
+}
+
+/* ===== CRUD MÉDAILLES (bibliothèque) ===== */
+let editingMedailleId = null;
+function resetMedailleForm() {
+  editingMedailleId = null;
+  document.getElementById('f-med-name').value = '';
+  document.getElementById('f-med-img').value = '';
+  document.getElementById('med-form-title').textContent = '+ Créer une médaille';
+  document.getElementById('btn-med').textContent = '▸ Créer la médaille';
+  document.getElementById('btn-med-cancel').style.display = 'none';
+}
+function cancelEditMedaille() { resetMedailleForm(); }
+function addMedaille() {
+  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
+  const name = document.getElementById('f-med-name').value.trim();
+  const img = document.getElementById('f-med-img').value.trim();
+  if (!name) { alert("Le nom est requis."); return; }
+  const op = editingMedailleId ? window.FB.updMedaille(editingMedailleId, {name,img}) : window.FB.addMedaille({name,img});
+  op.then(resetMedailleForm).catch(err => alert("Erreur : " + fbError(err)));
+}
+function editMedaille(id) {
+  const md = DATA.medailles.find(x => x._id === id); if (!md) return;
+  editingMedailleId = id;
+  document.getElementById('f-med-name').value = md.name || '';
+  document.getElementById('f-med-img').value = md.img || '';
+  document.getElementById('med-form-title').textContent = '✎ Modifier la médaille';
+  document.getElementById('btn-med').textContent = '✓ Enregistrer';
+  document.getElementById('btn-med-cancel').style.display = '';
+}
+function delMedaille(id) {
+  if (currentRole !== 'admin') return;
+  const md = DATA.medailles.find(x => x._id === id);
+  if (!confirm('Supprimer la médaille « ' + (md?md.name:'') + ' » ?\n(Les membres qui la portent la gardent telle quelle.)')) return;
+  window.FB.delMedaille(id).catch(err => alert("Erreur : " + fbError(err)));
+}
+
+/* ===== CRUD LORE ===== */
+let editingLoreId = null;
+function resetLoreForm() {
+  editingLoreId = null;
+  ['f-lore-date','f-lore-title','f-lore-body'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f-lore-hl').checked = false;
+  document.getElementById('lore-form-title').textContent = '+ Ajouter un événement';
+  document.getElementById('btn-lore').textContent = '▸ Ajouter l\'événement';
+  document.getElementById('btn-lore-cancel').style.display = 'none';
+}
+function cancelEditLore() { resetLoreForm(); }
+function addLore() {
+  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
+  const date = document.getElementById('f-lore-date').value.trim();
+  const title = document.getElementById('f-lore-title').value.trim();
+  const body = document.getElementById('f-lore-body').value.trim();
+  const highlight = document.getElementById('f-lore-hl').checked;
+  if (!title) { alert("Le titre est requis."); return; }
+  const data = { date, title, body, highlight };
+  let op;
+  if (editingLoreId) {
+    const ex = DATA.lore.find(x => x._id === editingLoreId);
+    data.order = ex ? (ex.order || 0) : Date.now();
+    op = window.FB.updLore(editingLoreId, data);
+  } else {
+    data.order = Date.now();
+    op = window.FB.addLore(data);
+  }
+  op.then(resetLoreForm).catch(err => alert("Erreur : " + fbError(err)));
+}
+function editLore(id) {
+  const l = DATA.lore.find(x => x._id === id); if (!l) return;
+  editingLoreId = id;
+  document.getElementById('f-lore-date').value = l.date || '';
+  document.getElementById('f-lore-title').value = l.title || '';
+  document.getElementById('f-lore-body').value = l.body || '';
+  document.getElementById('f-lore-hl').checked = !!l.highlight;
+  document.getElementById('lore-form-title').textContent = '✎ Modifier l\'événement';
+  document.getElementById('btn-lore').textContent = '✓ Enregistrer';
+  document.getElementById('btn-lore-cancel').style.display = '';
+}
+function delLore(id) {
+  if (currentRole !== 'admin') return;
+  const l = DATA.lore.find(x => x._id === id);
+  if (!confirm('Supprimer l\'événement « ' + (l?l.title:'') + ' » ?')) return;
+  window.FB.delLore(id).catch(err => alert("Erreur : " + fbError(err)));
+}
+function saveLoreIntro() {
+  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
+  window.FB.setContenu({ loreIntro: document.getElementById('f-lore-intro').value.trim() })
+    .then(() => alert("Intro enregistrée.")).catch(err => alert("Erreur : " + fbError(err)));
+}
+function saveRecrutement() {
+  if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
+  window.FB.setContenu({
+    recMotto: document.getElementById('f-rec-motto').value.trim(),
+    recIntro: document.getElementById('f-rec-intro').value.trim(),
+    recConditions: document.getElementById('f-rec-conditions').value.trim(),
+    recAvancement: document.getElementById('f-rec-avancement').value.trim(),
+    recValeurs: document.getElementById('f-rec-valeurs').value.trim()
+  }).then(() => alert("Recrutement enregistré.")).catch(err => alert("Erreur : " + fbError(err)));
 }
 
 /* ===== IMPORT DES DONNÉES PAR DÉFAUT (1ère installation) ===== */
@@ -2285,6 +2634,9 @@ function startFirebase() {
   window.FB.watchComptes(list => { DATA.comptes = list; if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
   window.FB.watchAnnonces(list => { DATA.annonces = list; renderAnnonces(); if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
   window.FB.watchConfig(cfg => { DATA.config = cfg || {}; applyConfig(); });
+  window.FB.watchLore(list => { DATA.lore = list; renderLore(); if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
+  window.FB.watchContenu(c => { DATA.contenu = c || {}; applyContenu(); if (document.getElementById('dashboard').classList.contains('active')) prefillContenuForm(); });
+  window.FB.watchMedailles(list => { DATA.medailles = list; refreshMedalDropdown(); if (document.getElementById('dashboard').classList.contains('active')) renderDashLists(); });
 }
 
 if (window.FB && window.FB.ready) startFirebase();
