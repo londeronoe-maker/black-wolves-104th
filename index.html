@@ -163,10 +163,6 @@ body {
   background: var(--red);
   width: 0;
 }
-.boot-bar-pct {
-  position: absolute; right: 8px; top: 1px;
-  font-size: 13px; color: var(--red);
-}
 
 /* ========== SIDEBAR ========== */
 #sidebar {
@@ -304,7 +300,6 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 }
 .card.accent-red   { border-top-color: var(--red); }
 .card.accent-amber { border-top-color: var(--amber); }
-.card.accent-green { border-top-color: var(--green-ok); }
 
 .card-tag { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); margin-bottom: 10px; display: block; text-transform: uppercase; }
 .card-title { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px; color: var(--text); }
@@ -341,8 +336,6 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 .tl-date  { font-size: 9px; letter-spacing: 3px; color: var(--red); margin-bottom: 5px; text-transform: uppercase; }
 .tl-title { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; margin-bottom: 10px; color: var(--text); }
 .tl-body  { font-size: 13px; line-height: 1.85; color: var(--text-dim); }
-.tl-hi    { color: var(--red); font-weight: bold; }
-.tl-name  { color: var(--amber); }
 
 /* ========== MEMBERS ========== */
 .member-card {
@@ -407,7 +400,6 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 .member-role { font-size: 11px; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 8px; line-height: 1.6; }
 .badge { display: inline-block; font-size: 8px; letter-spacing: 2px; padding: 3px 8px; border: 1px solid; text-transform: uppercase; }
 .badge-red   { color: var(--red);   border-color: var(--red-border);   background: var(--red-dim); }
-.badge-amber { color: var(--amber); border-color: var(--amber-border); background: var(--amber-dim); }
 
 /* ========== EQUIPMENT ========== */
 /* Category block */
@@ -464,32 +456,40 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
 .equip-photo.img-fail img { display: none; }
 .equip-photo.img-fail .photo-fallback { display: block; }
 
-.equip-3d .model-overlay {
+/* vidéo d'équipement */
+.equip-video .video-overlay {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  background: #0a0a0a;
-  cursor: pointer;
-  transition: opacity 0.3s;
-  z-index: 2;
+  background: #0a0a0a; cursor: pointer; gap: 10px;
+  transition: filter 0.2s; z-index: 2;
 }
-
-.equip-3d .model-overlay.hidden { opacity: 0; pointer-events: none; }
+.equip-video .video-overlay:hover { filter: brightness(1.15); }
+.equip-video .video-overlay:hover .play-btn { background: var(--red); color: #fff; transform: scale(1.06); }
+.video-poster {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  opacity: 0.55;
+}
+.video-overlay > .play-btn, .video-overlay > .model-preview-label, .video-overlay > .model-preview-icon { position: relative; z-index: 1; }
+.play-btn {
+  width: 56px; height: 56px; border-radius: 50%;
+  border: 2px solid var(--red); color: var(--red);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; padding-left: 4px; background: rgba(0,0,0,0.45);
+  transition: all 0.2s;
+}
+.equip-video-frame { width: 100%; height: 100%; border: none; display: block; background: #000; object-fit: contain; }
 
 .model-preview-icon {
-  font-size: 36px; margin-bottom: 10px;
+  font-size: 36px; margin-bottom: 4px;
   filter: drop-shadow(0 0 10px rgba(95,134,163,0.5));
 }
 
 .model-preview-label {
   font-family: 'Orbitron', sans-serif;
   font-size: 9px; letter-spacing: 3px;
-  color: var(--red); margin-bottom: 6px;
-}
-
-.model-preview-hint {
-  font-size: 10px; letter-spacing: 2px;
-  color: var(--text-muted);
+  color: var(--red);
 }
 
 .model-badge {
@@ -709,62 +709,6 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   .dash-tab { padding: 12px 12px; font-size: 9px; }
 }
 
-/* ========== LOGIN COUNTDOWN ========== */
-#login-countdown {
-  position: fixed; inset: 0;
-  background: #080808;
-  z-index: 600;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: 'VT323', monospace;
-  color: var(--red);
-  text-align: center;
-  padding: 40px;
-}
-#login-countdown.active { display: flex; }
-
-.lc-scanlines {
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.08) 3px, rgba(0,0,0,0.08) 4px);
-  pointer-events: none;
-}
-.lc-status {
-  font-size: 16px; letter-spacing: 4px;
-  color: #27c93f; margin-bottom: 8px; position: relative;
-}
-.lc-user {
-  font-family: 'Orbitron', sans-serif;
-  font-size: clamp(18px, 4vw, 30px); font-weight: 900;
-  letter-spacing: 4px; color: #fff; margin-bottom: 30px;
-  position: relative; text-shadow: 0 0 20px rgba(95,134,163,0.4);
-}
-.lc-ring {
-  position: relative; width: 180px; height: 180px; margin-bottom: 24px;
-}
-.lc-ring svg { transform: rotate(-90deg); }
-.lc-ring .lc-track { fill: none; stroke: rgba(95,134,163,0.15); stroke-width: 6; }
-.lc-ring .lc-prog  { fill: none; stroke: var(--red); stroke-width: 6; stroke-linecap: round;
-  filter: drop-shadow(0 0 6px rgba(95,134,163,0.6)); transition: stroke-dashoffset 1s linear; }
-.lc-num {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-family: 'Orbitron', sans-serif; font-size: 64px; font-weight: 900; color: #fff;
-}
-.lc-msg { font-size: 16px; letter-spacing: 2px; color: var(--text-dim); min-height: 22px; position: relative; }
-.lc-bar-track {
-  width: 320px; max-width: 80vw; height: 8px; border: 1px solid rgba(95,134,163,0.3);
-  background: #0f0f0f; margin: 18px 0 10px; position: relative; overflow: hidden;
-}
-.lc-bar-fill { height: 100%; background: var(--red); width: 0; transition: width 1s linear; }
-.lc-skip {
-  margin-top: 20px; font-family: 'Share Tech Mono', monospace;
-  font-size: 11px; letter-spacing: 2px; color: var(--text-muted);
-  background: transparent; border: 1px solid var(--border-mid); padding: 8px 18px;
-  cursor: pointer; text-transform: uppercase; transition: all 0.18s; position: relative;
-}
-.lc-skip:hover { color: #fff; border-color: var(--red); }
-
 /* ========== INFO BOX ========== */
 .info-box {
   border: 1px solid var(--amber-border);
@@ -885,8 +829,8 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   border-bottom: 1px solid rgba(95,134,163,0.25); display: flex; align-items: center; gap: 9px;
 }
 .board-led { width: 8px; height: 8px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red); animation: blink 1.5s infinite; }
-.board-item, .comms-item { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.board-item:last-child, .comms-item:last-child { border-bottom: none; }
+.comms-item { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.comms-item:last-child { border-bottom: none; }
 .comms-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 7px; }
 .comms-sender {
   font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700;
@@ -1413,12 +1357,12 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
         </div>
         <div class="dash-field"><label>Nom complet</label><input id="f-eq-name" placeholder="ex: DC-17 Hand Blaster"></div>
         <div class="dash-field"><label>Description</label><textarea id="f-eq-desc" placeholder="Description de l'équipement"></textarea></div>
-        <div class="dash-field"><label>Image (URL, optionnel)</label><input id="f-eq-img" placeholder="https://... (photo de l'équipement)"></div>
+        <div class="dash-field"><label>Image (URL, optionnel — sert d'aperçu)</label><input id="f-eq-img" placeholder="https://... (photo de l'équipement)"></div>
         <div class="dash-form-grid">
           <div class="dash-field"><label>Icône (emoji, optionnel)</label><input id="f-eq-icon" placeholder="ex: 🔫" value="📦"></div>
-          <div class="dash-field"><label>ID modèle Sketchfab (optionnel)</label><input id="f-eq-sf" placeholder="ex: 133cbdf..."></div>
+          <div class="dash-field"><label>Vidéo (URL YouTube ou .mp4, optionnel)</label><input id="f-eq-video" placeholder="https://youtu.be/..."></div>
         </div>
-        <div style="font-size:10px; color:var(--text-muted); margin:-4px 0 12px; line-height:1.5;">Priorité d'affichage : image &gt; modèle 3D &gt; icône.</div>
+        <div style="font-size:10px; color:var(--text-muted); margin:-4px 0 12px; line-height:1.5;">Si une vidéo est ajoutée, l'objet devient cliquable pour la regarder (l'image sert d'aperçu). Sinon : image &gt; icône.</div>
         <button class="dash-add-btn" id="btn-eq" onclick="addEquip()">▸ Ajouter à l'inventaire</button>
         <button class="dash-add-btn" id="btn-eq-cancel" onclick="cancelEditEquip()" style="display:none; background:transparent; border-color:var(--border-mid); color:var(--text-dim); margin-left:8px;">Annuler</button>
       </div>
@@ -1538,7 +1482,6 @@ nav a .nav-icon { font-size: 13px; min-width: 16px; opacity: 0.8; }
   </div>
 </div>
 
-<!-- ====== ÉCRAN DE CONNEXION (compte à rebours via terminal) ====== -->
 
 <script>
 // ====== VOIX D'INTRO (base64 intégré) ======
@@ -1665,13 +1608,24 @@ function showDashboard() {
   openDashboard();
 }
 
-// LOAD 3D MODEL (Sketchfab lazy load)
-function loadModel(iframeId) {
-  const iframe = document.getElementById(iframeId);
-  if (!iframe) return;
-  iframe.src = iframe.getAttribute('data-src');
-  const overlay = iframe.parentElement.querySelector('.model-overlay');
-  if (overlay) overlay.classList.add('hidden');
+// ===== VIDÉO ÉQUIPEMENT =====
+function parseYouTube(url) {
+  const m = String(url).match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
+  return m ? m[1] : null;
+}
+function buildVideoEmbed(url) {
+  const yt = parseYouTube(url);
+  if (yt) {
+    return `<iframe class="equip-video-frame" src="https://www.youtube.com/embed/${yt}?autoplay=1&rel=0" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+  }
+  return `<video class="equip-video-frame" src="${esc(url)}" controls autoplay playsinline></video>`;
+}
+function playEquipVideo(id) {
+  const e = DATA.equipements.find(x => x._id === id);
+  if (!e || !e.video) return;
+  const box = document.getElementById('equip-view-' + id);
+  if (!box) return;
+  box.innerHTML = buildVideoEmbed(e.video) + '<span class="model-badge">VIDÉO</span>';
 }
 
 /* ============================================================
@@ -1688,14 +1642,14 @@ const DEFAULT_DATA = {
     { rank:'▲ Fondateur', name:'MOUSE', id:'Technicien / Pirate Informatique', role:'Systèmes CIS, Réparations de terrain, Ingénierie', badge:'FONDATEUR', tier:50, tierLabel:'Soldat', medals:['🎖️ Héros de Felucia','💻 Génie Technique'] }
   ],
   equipements: [
-    { cat:'individuel', code:'DC-15A', name:'DC-15A Blaster Rifle', desc:'Fusil blaster standard des soldats clones. Précision longue portée, fiable dans tous les environnements de combat.', icon:'🔫', sf:'133cbdfdf0ae41078a7c5f1f93b7a7a4' },
-    { cat:'individuel', code:'Z-6', name:'Z-6 Rotary Blaster Cannon', desc:"Mitrailleuse rotative 6 canons. Cadence de tir dévastatrice. Supprime les vagues d'infanterie droïde.", icon:'⚙️', sf:'003791d3a53d4d2facb46f9325ca83da' },
-    { cat:'individuel', code:'EXP', name:'Charges Explosives & Détonateurs', desc:'Spécialité signature des Black Wolves depuis Felucia. Neutralisation de fortifications, sabotage de ravitaillement ennemi.', icon:'💣', sf:'' },
-    { cat:'individuel', code:'SYS', name:'Kit Piratage Systèmes CIS', desc:'Outil technique spécialisé. Détourne, perturbe ou désactive les réseaux de commandement droïdes ennemis.', icon:'💻', sf:'' },
-    { cat:'vehicule', code:'AT-TE', name:'All Terrain Tactical Enforcer', desc:'Marcheur blindé lourd à 6 pattes. Canon laser ventral + 6 canons laser de flanc. Colonne vertébrale de la compagnie.', icon:'🦿', sf:'81ef81cf6c554055b741b43a1a08d69f' },
-    { cat:'vehicule', code:'TX-225', name:'Occupier Combat Assault Tank', desc:'Véhicule de combat rapide à chenilles. Idéal pour les assauts urbains et la percée de lignes défensives.', icon:'🚜', sf:'f1ef52168cc2483e9369899ff532b21f' },
-    { cat:'vehicule', code:'AT-RT', name:'All Terrain Recon Transport', desc:"Marcheur léger bipède monoplace. Mobilité maximale pour la reconnaissance et le harcèlement d'infanterie.", icon:'🤖', sf:'22ef70d90e834539ac4e6c790acba8dd' },
-    { cat:'canon', code:'AV-7', name:'AV-7 Antivehicle Cannon', desc:"Canon d'artillerie lourde antiblindé. Longue portée. Soutien indirect pour troupes au sol. Détruit tout véhicule ennemi.", icon:'🎯', sf:'' }
+    { cat:'individuel', code:'DC-15A', name:'DC-15A Blaster Rifle', desc:'Fusil blaster standard des soldats clones. Précision longue portée, fiable dans tous les environnements de combat.', icon:'🔫', video:'' },
+    { cat:'individuel', code:'Z-6', name:'Z-6 Rotary Blaster Cannon', desc:"Mitrailleuse rotative 6 canons. Cadence de tir dévastatrice. Supprime les vagues d'infanterie droïde.", icon:'⚙️', video:'' },
+    { cat:'individuel', code:'EXP', name:'Charges Explosives & Détonateurs', desc:'Spécialité signature des Black Wolves depuis Felucia. Neutralisation de fortifications, sabotage de ravitaillement ennemi.', icon:'💣', video:'' },
+    { cat:'individuel', code:'SYS', name:'Kit Piratage Systèmes CIS', desc:'Outil technique spécialisé. Détourne, perturbe ou désactive les réseaux de commandement droïdes ennemis.', icon:'💻', video:'' },
+    { cat:'vehicule', code:'AT-TE', name:'All Terrain Tactical Enforcer', desc:'Marcheur blindé lourd à 6 pattes. Canon laser ventral + 6 canons laser de flanc. Colonne vertébrale de la compagnie.', icon:'🦿', video:'' },
+    { cat:'vehicule', code:'TX-225', name:'Occupier Combat Assault Tank', desc:'Véhicule de combat rapide à chenilles. Idéal pour les assauts urbains et la percée de lignes défensives.', icon:'🚜', video:'' },
+    { cat:'vehicule', code:'AT-RT', name:'All Terrain Recon Transport', desc:"Marcheur léger bipède monoplace. Mobilité maximale pour la reconnaissance et le harcèlement d'infanterie.", icon:'🤖', video:'' },
+    { cat:'canon', code:'AV-7', name:'AV-7 Antivehicle Cannon', desc:"Canon d'artillerie lourde antiblindé. Longue portée. Soutien indirect pour troupes au sol. Détruit tout véhicule ennemi.", icon:'🎯', video:'' }
   ]
 };
 
@@ -1791,29 +1745,32 @@ function renderEffectifs() {
 /* ===== RENDU PAGE ÉQUIPEMENT ===== */
 function equipCardHTML(e, idx) {
   let viewer;
-  if (e.img) {
+  const ico = esc(e.icon || '📦');
+  if (e.video) {
+    // Aperçu cliquable : image en fond si dispo, sinon icône — au clic, la vidéo se lance
+    const poster = e.img
+      ? `<div class="video-poster" style="background-image:url('${esc(e.img)}');"></div>`
+      : `<div class="model-preview-icon">${ico}</div>`;
+    viewer = `<div class="equip-3d equip-video" id="equip-view-${esc(e._id)}">
+      <div class="video-overlay" onclick="playEquipVideo('${esc(e._id)}')">
+        ${poster}
+        <div class="play-btn">▶</div>
+        <div class="model-preview-label">VOIR LA VIDÉO</div>
+      </div>
+      <span class="model-badge">VIDÉO</span>
+    </div>`;
+  } else if (e.img) {
     viewer = `<div class="equip-3d equip-photo">
       <img src="${esc(e.img)}" alt="${esc(e.name)}" loading="lazy" onerror="this.parentElement.classList.add('img-fail')">
-      <span class="photo-fallback">${esc(e.icon||'📦')} ${esc(e.code)}</span>
+      <span class="photo-fallback">${ico} ${esc(e.code)}</span>
       <span class="model-badge">IMAGE</span>
-    </div>`;
-  } else if (e.sf) {
-    const fid = 'sf-eq-' + idx;
-    viewer = `<div class="equip-3d">
-      <iframe id="${fid}" data-src="https://sketchfab.com/models/${esc(e.sf)}/embed?autostart=0&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_controls=1" allowfullscreen></iframe>
-      <div class="model-overlay" onclick="loadModel('${fid}')">
-        <div class="model-preview-icon">${esc(e.icon||'📦')}</div>
-        <div class="model-preview-label">MODÈLE 3D DISPONIBLE</div>
-        <div class="model-preview-hint">▶ Cliquer pour charger</div>
-      </div>
-      <span class="model-badge">SKETCHFAB</span>
     </div>`;
   } else {
     viewer = `<div class="equip-3d" style="display:flex; align-items:center; justify-content:center;">
       <div style="text-align:center; padding:20px;">
-        <div style="font-size:32px; margin-bottom:10px;">${esc(e.icon||'📦')}</div>
+        <div style="font-size:32px; margin-bottom:10px;">${ico}</div>
         <div style="font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:2px; color:var(--red); margin-bottom:6px;">DONNÉES TACTIQUES</div>
-        <div style="font-size:10px; color:var(--text-muted); letter-spacing:1px;">Aperçu image / capture<br>à intégrer</div>
+        <div style="font-size:10px; color:var(--text-muted); letter-spacing:1px;">Aperçu image / vidéo<br>à intégrer</div>
       </div>
     </div>`;
   }
@@ -2196,7 +2153,7 @@ function renderDashLists() {
   eq.innerHTML = DATA.equipements.map(e => `<div class="dash-row">
     ${e.img ? `<img class="dash-thumb" src="${esc(e.img)}" alt="" onerror="this.style.display='none'">` : ''}
     <div class="dash-row-info">
-      <div class="dash-row-meta">${esc(catLabel[e.cat]||e.cat)} · ${esc(e.code)}${e.img?' · IMG':(e.sf?' · 3D':'')}</div>
+      <div class="dash-row-meta">${esc(catLabel[e.cat]||e.cat)} · ${esc(e.code)}${e.video?' · 🎬':(e.img?' · IMG':'')}</div>
       <div class="dash-row-title">${esc(e.icon||'')} ${esc(e.name)}</div>
       <div class="dash-row-sub">${esc(e.desc)}</div>
     </div>
@@ -2441,13 +2398,13 @@ function equipFormData() {
     name: document.getElementById('f-eq-name').value.trim(),
     desc: document.getElementById('f-eq-desc').value.trim() || '—',
     icon: document.getElementById('f-eq-icon').value.trim() || '📦',
-    sf: document.getElementById('f-eq-sf').value.trim(),
+    video: document.getElementById('f-eq-video').value.trim(),
     img: document.getElementById('f-eq-img').value.trim()
   };
 }
 function resetEquipForm() {
   editingEquipId = null;
-  ['f-eq-code','f-eq-name','f-eq-desc','f-eq-sf','f-eq-img'].forEach(id => document.getElementById(id).value='');
+  ['f-eq-code','f-eq-name','f-eq-desc','f-eq-video','f-eq-img'].forEach(id => document.getElementById(id).value='');
   document.getElementById('f-eq-icon').value = '📦';
   document.getElementById('btn-eq').textContent = "▸ Ajouter à l'inventaire";
   document.getElementById('btn-eq-cancel').style.display = 'none';
@@ -2472,7 +2429,7 @@ function editEquip(id) {
   document.getElementById('f-eq-name').value = e.name || '';
   document.getElementById('f-eq-desc').value = e.desc || '';
   document.getElementById('f-eq-icon').value = e.icon || '📦';
-  document.getElementById('f-eq-sf').value = e.sf || '';
+  document.getElementById('f-eq-video').value = e.video || '';
   document.getElementById('f-eq-img').value = e.img || '';
   document.getElementById('btn-eq').textContent = '✓ Enregistrer les modifications';
   document.getElementById('btn-eq-cancel').style.display = '';
