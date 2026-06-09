@@ -1707,6 +1707,24 @@ function esc(s) {
   return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
+/* ===== LOGS DISCORD (via le bot MultiBOT) ===== */
+const DISCORD_LOG_URL = "https://candidature-bot-5ih5.onrender.com/log";
+const DISCORD_LOG_SECRET = "K1nv]8R63c£3";
+function discordLog(type, message) {
+  try {
+    fetch(DISCORD_LOG_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret: DISCORD_LOG_SECRET,
+        type: type,
+        message: message,
+        user: currentUser ? shortUser(currentUser) : 'Visiteur'
+      })
+    }).catch(() => {});
+  } catch (e) {}
+}
+
 /* ===== RENDU PAGE EFFECTIFS (organigramme par grade) ===== */
 function memberCardHTML(m) {
   const photo = m.img
@@ -1900,7 +1918,7 @@ function saveConfig() {
     iconIndividuel: document.getElementById('f-cfg-ico-individuel').value.trim(),
     iconVehicule: document.getElementById('f-cfg-ico-vehicule').value.trim(),
     iconCanon: document.getElementById('f-cfg-ico-canon').value.trim()
-  }).then(() => alert("Images enregistrées.")).catch(err => alert("Erreur : " + fbError(err)));
+  }).then(() => { discordLog('Images modifiées', 'Logo / icônes mis à jour'); alert("Images enregistrées."); }).catch(err => alert("Erreur : " + fbError(err)));
 }
 
 /* ============================================================
@@ -1946,6 +1964,7 @@ function termRunCommand(raw) {
       .then(() => { /* onAuth s'occupe du reste */ })
       .catch(err => {
         soundError();
+        discordLog('⚠ Connexion échouée', 'Tentative de connexion : `' + email + '` — ' + fbError(err));
         termPrint("ACCÈS REFUSÉ — " + esc(fbError(err)), 'term-out-red');
       });
     return;
@@ -2020,7 +2039,7 @@ function termRunCommand(raw) {
       break;
     case 'deconnexion':
     case 'logout':
-      if (currentUser && window.FB) { window.FB.signOut(); }
+      if (currentUser && window.FB) { discordLog('Déconnexion', '**' + shortUser(currentUser) + '** s\'est déconnecté'); window.FB.signOut(); }
       else termPrint('Aucune session active.', 'term-out-dim');
       break;
     case 'clear':
@@ -2146,6 +2165,7 @@ function prefillContenuForm() {
   set('f-rec-valeurs', c.recValeurs);
 }
 function dashLogout() {
+  if (currentUser) discordLog('Déconnexion', '**' + shortUser(currentUser) + '** s\'est déconnecté');
   if (window.FB) window.FB.signOut();
   // onAuth (déconnexion) masque la catégorie et revient à l'accueil
 }
@@ -2270,7 +2290,8 @@ function addAnnonce() {
   } else {
     op = window.FB.addAnnonce({ title, body, ts: Date.now() });
   }
-  op.then(resetAnnonceForm).catch(err => alert("Erreur : " + fbError(err)));
+  const isEdit = !!editingAnnonceId;
+  op.then(() => { discordLog(isEdit ? 'Annonce modifiée' : 'Annonce émise', '**' + title + '**'); resetAnnonceForm(); }).catch(err => alert("Erreur : " + fbError(err)));
 }
 function editAnnonce(id) {
   const a = DATA.annonces.find(x => x._id === id); if (!a) return;
@@ -2285,7 +2306,8 @@ function editAnnonce(id) {
 function delAnnonce(id) {
   if (currentRole !== 'admin') return;
   if (!confirm("Retirer cette annonce ?")) return;
-  window.FB.delAnnonce(id).catch(err => alert("Erreur : " + fbError(err)));
+  const a = DATA.annonces.find(x => x._id === id);
+  window.FB.delAnnonce(id).then(() => discordLog('Annonce retirée', '**' + (a?a.title:'?') + '**')).catch(err => alert("Erreur : " + fbError(err)));
 }
 
 /* ===== CRUD COMPTES (Firebase Auth + Firestore) ===== */
@@ -2306,6 +2328,7 @@ function addAccount() {
     .then(() => {
       document.getElementById('f-acc-id').value = '';
       document.getElementById('f-acc-pw').value = '';
+      discordLog('Compte créé', '**' + email + '** · rôle : ' + role);
       alert("Compte créé : " + email + " (" + role + ").");
     })
     .catch(err => alert("Erreur : " + fbError(err)))
@@ -2315,6 +2338,7 @@ function delAccount(uid, email) {
   if (currentRole !== 'admin') return;
   if (!confirm("Retirer " + (email||uid) + " de la liste ?\n\n⚠ Cela retire le membre de la liste et de ses droits, mais le compte de connexion Firebase doit être supprimé manuellement dans la console Firebase (Authentication → Users).")) return;
   Promise.all([ window.FB.delCompte(uid), window.FB.setRole(uid, 'revoked') ])
+    .then(() => discordLog('Compte retiré', '**' + (email||uid) + '**'))
     .catch(err => alert("Erreur : " + fbError(err)));
 }
 
@@ -2377,8 +2401,12 @@ function addMember() {
   if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
   const data = memberFormData();
   if (!data.name) { alert('Le nom de code est requis.'); return; }
+  const isEdit = !!editingMemberId;
   const op = editingMemberId ? window.FB.updEffectif(editingMemberId, data) : window.FB.addEffectif(data);
-  op.then(resetMemberForm).catch(err => alert("Erreur : " + fbError(err)));
+  op.then(() => {
+    discordLog(isEdit ? 'Membre modifié' : 'Membre ajouté', '**' + data.name + '** (' + data.tierLabel + ')');
+    resetMemberForm();
+  }).catch(err => alert("Erreur : " + fbError(err)));
 }
 function editMember(id) {
   const m = DATA.effectifs.find(x => x._id === id); if (!m) return;
@@ -2401,7 +2429,7 @@ function delMember(id) {
   if (currentRole !== 'admin') return;
   const m = DATA.effectifs.find(x => x._id === id);
   if (!confirm('Retirer ' + (m?m.name:'') + ' de la meute ?')) return;
-  window.FB.delEffectif(id).catch(err => alert("Erreur : " + fbError(err)));
+  window.FB.delEffectif(id).then(() => discordLog('Membre retiré', '**' + (m?m.name:'?') + '**')).catch(err => alert("Erreur : " + fbError(err)));
 }
 
 /* ===== CRUD ÉQUIPEMENTS (avec édition) ===== */
@@ -2429,8 +2457,12 @@ function addEquip() {
   if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
   const data = equipFormData();
   if (!data.code || !data.name) { alert('Le code et le nom sont requis.'); return; }
+  const isEdit = !!editingEquipId;
   const op = editingEquipId ? window.FB.updEquip(editingEquipId, data) : window.FB.addEquip(data);
-  op.then(resetEquipForm).catch(err => alert("Erreur : " + fbError(err)));
+  op.then(() => {
+    discordLog(isEdit ? 'Équipement modifié' : 'Équipement ajouté', '**' + data.code + '** — ' + data.name);
+    resetEquipForm();
+  }).catch(err => alert("Erreur : " + fbError(err)));
 }
 function editEquip(id) {
   const e = DATA.equipements.find(x => x._id === id); if (!e) return;
@@ -2451,7 +2483,7 @@ function delEquip(id) {
   if (currentRole !== 'admin') return;
   const e = DATA.equipements.find(x => x._id === id);
   if (!confirm('Retirer ' + (e?e.name:'') + ' de l\'inventaire ?')) return;
-  window.FB.delEquip(id).catch(err => alert("Erreur : " + fbError(err)));
+  window.FB.delEquip(id).then(() => discordLog('Équipement retiré', '**' + (e?e.name:'?') + '**')).catch(err => alert("Erreur : " + fbError(err)));
 }
 
 /* ===== CRUD MÉDAILLES (bibliothèque) ===== */
@@ -2470,8 +2502,9 @@ function addMedaille() {
   const name = document.getElementById('f-med-name').value.trim();
   const img = document.getElementById('f-med-img').value.trim();
   if (!name) { alert("Le nom est requis."); return; }
+  const isEdit = !!editingMedailleId;
   const op = editingMedailleId ? window.FB.updMedaille(editingMedailleId, {name,img}) : window.FB.addMedaille({name,img});
-  op.then(resetMedailleForm).catch(err => alert("Erreur : " + fbError(err)));
+  op.then(() => { discordLog(isEdit ? 'Médaille modifiée' : 'Médaille créée', '**' + name + '**'); resetMedailleForm(); }).catch(err => alert("Erreur : " + fbError(err)));
 }
 function editMedaille(id) {
   const md = DATA.medailles.find(x => x._id === id); if (!md) return;
@@ -2486,7 +2519,7 @@ function delMedaille(id) {
   if (currentRole !== 'admin') return;
   const md = DATA.medailles.find(x => x._id === id);
   if (!confirm('Supprimer la médaille « ' + (md?md.name:'') + ' » ?\n(Les membres qui la portent la gardent telle quelle.)')) return;
-  window.FB.delMedaille(id).catch(err => alert("Erreur : " + fbError(err)));
+  window.FB.delMedaille(id).then(() => discordLog('Médaille supprimée', '**' + (md?md.name:'?') + '**')).catch(err => alert("Erreur : " + fbError(err)));
 }
 
 /* ===== CRUD LORE ===== */
@@ -2517,7 +2550,8 @@ function addLore() {
     data.order = Date.now();
     op = window.FB.addLore(data);
   }
-  op.then(resetLoreForm).catch(err => alert("Erreur : " + fbError(err)));
+  const isEdit = !!editingLoreId;
+  op.then(() => { discordLog(isEdit ? 'Lore modifié' : 'Lore ajouté', '**' + title + '**'); resetLoreForm(); }).catch(err => alert("Erreur : " + fbError(err)));
 }
 function editLore(id) {
   const l = DATA.lore.find(x => x._id === id); if (!l) return;
@@ -2534,12 +2568,12 @@ function delLore(id) {
   if (currentRole !== 'admin') return;
   const l = DATA.lore.find(x => x._id === id);
   if (!confirm('Supprimer l\'événement « ' + (l?l.title:'') + ' » ?')) return;
-  window.FB.delLore(id).catch(err => alert("Erreur : " + fbError(err)));
+  window.FB.delLore(id).then(() => discordLog('Lore supprimé', '**' + (l?l.title:'?') + '**')).catch(err => alert("Erreur : " + fbError(err)));
 }
 function saveLoreIntro() {
   if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
   window.FB.setContenu({ loreIntro: document.getElementById('f-lore-intro').value.trim() })
-    .then(() => alert("Intro enregistrée.")).catch(err => alert("Erreur : " + fbError(err)));
+    .then(() => { discordLog('Contenu modifié', 'Intro du Lore mise à jour'); alert("Intro enregistrée."); }).catch(err => alert("Erreur : " + fbError(err)));
 }
 function saveRecrutement() {
   if (currentRole !== 'admin') { alert("Réservé aux administrateurs."); return; }
@@ -2549,7 +2583,7 @@ function saveRecrutement() {
     recConditions: document.getElementById('f-rec-conditions').value.trim(),
     recAvancement: document.getElementById('f-rec-avancement').value.trim(),
     recValeurs: document.getElementById('f-rec-valeurs').value.trim()
-  }).then(() => alert("Recrutement enregistré.")).catch(err => alert("Erreur : " + fbError(err)));
+  }).then(() => { discordLog('Contenu modifié', 'Page Recrutement mise à jour'); alert("Recrutement enregistré."); }).catch(err => alert("Erreur : " + fbError(err)));
 }
 
 /* ===== IMPORT DES DONNÉES PAR DÉFAUT (1ère installation) ===== */
@@ -2607,6 +2641,7 @@ function startFirebase() {
       showPage('terminal');
       termPrint('Authentification réussie. Bienvenue, <span class="term-out-white">' + esc(shortUser(currentUser)) + '</span> [' + esc(currentRole) + '].', 'term-out-green');
       soundConfirm();
+      discordLog('Connexion', '**' + shortUser(currentUser) + '** s\'est connecté · rôle : ' + currentRole);
       // Décompte 10s en messages système, puis catégorie "Commandement"
       terminalCountdown(10, () => {
         const navD = document.getElementById('nav-dashboard');
